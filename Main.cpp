@@ -6,24 +6,48 @@
 
 using namespace std;
 
+void menu();
+void ingresarcomando();
 
-int main();
+Ann analisis;
+
+
+
 
 int main(){
-    Ann analisis;
 
     int opcion;
 
-    cout << "*********MENU GENERAL**********" << endl
+    while (opcion != 0){
+        cout << "*********MENU GENERAL**********" << endl
         << "*****Diego Andre Gomez 201908327*****" << endl
-        << "*1. Ingresar comando*" << endl
+        << "1) Ingresar comando*" << endl
+        << "0) Salir de la aplicacion" << endl
         << "*******************************" << endl;
 
-    string Entrada; //Comando que se desea ejecutar
+        cin >> opcion;
+
+        switch (opcion)
+        {
+        case 1:
+            ingresarcomando();
+            break;
+        }
+
+    } 
+    
+
+}
+
+void ingresarcomando(){
+
+    string useramne; //Comando que se desea ejecutar
     cout << "Escriba el comando que desea ejecutar" << endl;
 
-    getline(cin,Entrada);
+    cin.ignore(numeric_limits<int>::max(),'\n');
+    getline(cin,useramne);
+    
 
-    analisis.Analizar(Entrada);
+    analisis.Analizar(useramne);
 
 }

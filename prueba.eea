@@ -1,2 +1,3 @@
 mkdisk >size=3000 >unit=K >path=/home/useer/Disco1.dsk
-rep >path=/home/useer/Disco1.dsk
+
+fdisk >size=300 >unit=K >path=/home/useer/Disco1.dsk >name=Brotato

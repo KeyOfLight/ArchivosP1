@@ -29,6 +29,8 @@ public:
 bool Comandos::existeDisco(string path) {
     FILE *disk = fopen(path.c_str(), "rb");
 
+    cout << path << endl;
+
     if (!disk) {
         return false;
     }
@@ -57,6 +59,7 @@ void Comandos::MkDisk(Parametros parameters){
     int size = stoi(parameters.tam);
     // Crear MBR del disco
     MBR mbr;
+    size = realsize(size,parameters.unit);
     mbr.tamano = size;
     strcpy(mbr.fecha_creacion, fechayhora);
     mbr.disk_signature = rand() % 1000;
@@ -66,7 +69,7 @@ void Comandos::MkDisk(Parametros parameters){
     cout << "Fecha: " << mbr.fecha_creacion << endl;
     cout << "Signature: " << mbr.disk_signature  << endl;
 
-    size = realsize(mbr.tamano,parameters.unit);
+    
     // Crear el disco y escribir el mbr dentro
     FILE* disco = fopen(fullpath.c_str(), "wb+");
     if (disco != NULL) {
@@ -123,9 +126,11 @@ void Comandos::customSplit(string str, char separator) {
 int Comandos::realsize(int tam, string unidad){
 
     int newsize;
-    if(unidad == "k"){
+    if(unidad.find("k") == 0){
         newsize = tam * 1024;
-    }else if(unidad == "m"){
+    }else if(unidad.find("m") == 0){
+        newsize = tam * 1024 * 1024;
+    }else {
         newsize = tam * 1024 * 1024;
     }
 

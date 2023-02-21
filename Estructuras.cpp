@@ -15,6 +15,13 @@ struct Parametros //Parametros de todos los comandos que se van a utilizar
     string unit;
     string fit;
     string nombre;
+    string    status;
+    string    type;
+    string     start;
+    string     size ;
+    string del;
+    string add;
+
 
 };
 
