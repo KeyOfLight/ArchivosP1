@@ -3,31 +3,28 @@
 #include <fstream>
 using namespace std;
 
-
-class Fdisk{
-    public:
-
+class Fdisk
+{
+public:
     void CrearParticion(Parametros parameters);
     bool existeDisco(string path);
     int tamparticiones(MBR TempMbr);
 
-
     Comando cmd;
 };
 
-bool Fdisk::existeDisco(string path) {
+bool Fdisk::existeDisco(string path)
+{
 
     char temp = path.back();
 
-    if(temp == ' ')
+    if (temp == ' ')
         path.pop_back();
-
 
     FILE *disk = fopen(path.c_str(), "rb");
 
-
-
-    if (!disk) {
+    if (!disk)
+    {
         return false;
     }
 
@@ -35,8 +32,9 @@ bool Fdisk::existeDisco(string path) {
     return true;
 }
 
-void Fdisk::CrearParticion(Parametros parameters){//Crea las particiones para los discos
-    
+void Fdisk::CrearParticion(Parametros parameters)
+{ // Crea las particiones para los discos
+
     int size_ = stoi(parameters.tam);
     string unidad = parameters.unit;
     int newsize;
@@ -45,67 +43,72 @@ void Fdisk::CrearParticion(Parametros parameters){//Crea las particiones para lo
 
     char temp = path.back();
 
-    if(temp == ' ')
+    if (temp == ' ')
         path.pop_back();
 
-
-    if(unidad.find("k") == 0){
+    if (unidad.find("k") == 0)
+    {
         newsize = size_ * 1024;
-    }else if(unidad.find("m") == 0){
+    }
+    else if (unidad.find("m") == 0)
+    {
         newsize = size_ * 1024 * 1024;
-    }else {
+    }
+    else
+    {
         newsize = size_ * 1024 * 1024;
     }
 
-    if (!existeDisco(path)){
-        cout << "El disco al cual desea crearle una particion no existe o no pudo ser encontrado"<<endl;
+    if (!existeDisco(path))
+    {
+        cout << "El disco al cual desea crearle una particion no existe o no pudo ser encontrado" << endl;
         return;
     }
-
 
     ifstream dsk(path.c_str(), ios::out | ios::binary);
 
-    if(!dsk){
-        cout<<"Error, el archivo no pudo ser abierto."<<endl;
+    if (!dsk)
+    {
+        cout << "Error, el archivo no pudo ser abierto." << endl;
         return;
     }
 
-    MBR mbr;                                
+    MBR mbr;
 
-    dsk.read((char *) &mbr, sizeof(MBR));           //Se obtienen los datos del mbr deseado
+    dsk.read((char *)&mbr, sizeof(MBR)); // Se obtienen los datos del mbr deseado
 
     if (newsize < 0 and newsize > mbr.tamano)
     {
-        cout << "Se debe de crear una particion que ocupe mas de 0 bytes o que se menor que el disco"<<endl;
+        cout << "Se debe de crear una particion que ocupe mas de 0 bytes o que se menor que el disco" << endl;
         dsk.close();
         return;
     }
 
-    if (parameters.type == "p" or parameters.type == ""){
-        int filledsize = tamparticiones(mbr);/// Obtiene todo el tama;o ocupado por las particiones ya existentes
-        if(stoi(parameters.size) < (mbr.tamano - filledsize)){
+    if (parameters.type == "p" or parameters.type == "")
+    {
+        int filledsize = tamparticiones(mbr); /// Obtiene todo el tama;o ocupado por las particiones ya existentes
+        if (newsize < (mbr.tamano - filledsize))
+        {
             Particion EmptPart;
-            for (Particion i: mbr.particiones){
-                if(i.name == EmptPart.name){
-
+            for (int i = 0; i < 4; i++)
+            {
+                int result = strcmp(mbr.particiones[i].name, EmptPart.name);
+                if (result == 0)
+                {
+                    cout << "brotato" << endl;
                     break;
                 }
             }
-            
         }
-        
     }
-    
-
-
 
     dsk.close();
-
 }
 
-int Fdisk::tamparticiones(MBR TempMBR){//Se obtiene el tama;o de todas las particiones juntas
+int Fdisk::tamparticiones(MBR TempMBR)
+{ // Se obtiene el tama;o de todas las particiones juntas
 
-    int totalsize;     
+    int totalsize;
 
     for (const auto &i : TempMBR.particiones)
     {
