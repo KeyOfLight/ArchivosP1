@@ -84,18 +84,26 @@ void Fdisk::CrearParticion(Parametros parameters)
         return;
     }
 
-    if (parameters.type == "p" or parameters.type == "")
-    {
+    if (parameters.type == "p" or parameters.type == ""){
         int filledsize = tamparticiones(mbr); /// Obtiene todo el tama;o ocupado por las particiones ya existentes
         if (newsize < (mbr.tamano - filledsize))
         {
             Particion EmptPart;
+            for (int i = 0; i < 4; i++){
+                int result1 = strcmp(mbr.particiones[i].name, parameters.nombre);
+                if(result == 0){
+                    cout << "No se puede crear una particion con un nombre ya utilizado" << endl;
+                    return;
+                }
+
+            }
+
             for (int i = 0; i < 4; i++)
             {
                 int result = strcmp(mbr.particiones[i].name, EmptPart.name);
                 if (result == 0)
                 {
-                    cout << "brotato" << endl;
+                    mbr.particiones[i].name = parameters.nombre; 
                     break;
                 }
             }
