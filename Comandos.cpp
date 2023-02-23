@@ -5,7 +5,8 @@
 #include "Estructuras.cpp"
 #include <stdio.h>
 #include <string.h>
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
+#include "Compartido.cpp"
 
 using namespace std;
 
@@ -19,6 +20,7 @@ public:
 
 
     Comando cmd;
+    Compartido Compart;
     
 
 
@@ -63,6 +65,9 @@ void Comandos::MkDisk(Parametros parameters){
     mbr.tamano = size;
     strcpy(mbr.fecha_creacion, fechayhora);
     mbr.disk_signature = rand() % 1000;
+
+    mbr.disk_fit = Compart.VerFit(parameters.fit);
+
 
     cout << endl << "Disco creado" << endl;
     cout << "Size: " << mbr.tamano << parameters.unit << endl;
