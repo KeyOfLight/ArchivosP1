@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include "Estructuras.cpp"
 
@@ -18,10 +19,7 @@ int Compartido::VerFit(string Actualfit){
         if (fit.FitType[i] == Actualfit){
             return i;
         }
-
-        return 1;
         
     }
-    
-    
-}
+    return 1;
+};

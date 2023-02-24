@@ -20,8 +20,6 @@ public:
 
 
     Comando cmd;
-    Compartido Compart;
-    
 
 
     vector < string > strings;
@@ -66,7 +64,18 @@ void Comandos::MkDisk(Parametros parameters){
     strcpy(mbr.fecha_creacion, fechayhora);
     mbr.disk_signature = rand() % 1000;
 
-    mbr.disk_fit = Compart.VerFit(parameters.fit);
+    Compartido compa;
+    int currentFit;
+
+    currentFit = compa.VerFit(parameters.fit);
+
+    if(currentFit = 0){//Best Fit
+        mbr.disk_fit = 'b';
+    }else if(currentFit = 1){//First Fit
+        mbr.disk_fit = 'f';
+    }else if(currentFit = 2){//Worst Fit
+        mbr.disk_fit = 'w';
+    }
 
 
     cout << endl << "Disco creado" << endl;
