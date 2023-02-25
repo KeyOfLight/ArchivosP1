@@ -11,9 +11,6 @@ void ingresarcomando();
 
 Ann analisis;
 
-
-
-
 int main(){
 
     int opcion;

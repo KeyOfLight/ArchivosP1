@@ -69,11 +69,11 @@ void Comandos::MkDisk(Parametros parameters){
 
     currentFit = compa.VerFit(parameters.fit);
 
-    if(currentFit = 0){//Best Fit
+    if(currentFit == 0){//Best Fit
         mbr.disk_fit = 'b';
-    }else if(currentFit = 1){//First Fit
+    }else if(currentFit == 1){//First Fit
         mbr.disk_fit = 'f';
-    }else if(currentFit = 2){//Worst Fit
+    }else if(currentFit == 2){//Worst Fit
         mbr.disk_fit = 'w';
     }
 

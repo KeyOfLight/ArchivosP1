@@ -12,8 +12,12 @@ public:
     bool existeDisco(string path);
     int tamparticiones(MBR TempMbr);
     Particion ActivarParticion(Particion oldPart, Parametros parameters, int size, int startpoint);
+    
     int GetPositionFF(MBR mbrActual, int Tam);
     MBR OrdenarArray(MBR AllArrays);
+    bool IstheDiskEmpty(MBR mbrActual);
+    int GetPositionBF(MBR mbrActual, int Tam);
+    EBR ActivarEBR(Parametros parameters, int size, int startpoint, int nextEBR);
 
     Comando cmd;
     Compartido compart;
@@ -94,17 +98,16 @@ void Fdisk::CrearParticion(Parametros parameters)
 
     currentFit = compart.VerFit(parameters.fit);
 
-    if(currentFit = 0){//Best Fit
+    if(currentFit == 0){//Best Fit
+        startpoint = GetPositionBF(mbr, newsize);
+        parameters.fit = "b";
 
-
-    }else if(currentFit = 1){//First Fit
+    }else if(currentFit == 1){//First Fit
         startpoint = GetPositionFF(mbr, newsize);
         parameters.fit = "f";
-            
 
-
-    }else if(currentFit = 2){//Worst Fit
-
+    }else if(currentFit == 2){//Worst Fit
+        
 
     }
 
@@ -132,11 +135,93 @@ void Fdisk::CrearParticion(Parametros parameters)
                     break;
                 }
             }
+        }else {
+            cout << "La particion debe ser menor al tam total del disco" << endl;
+        }
+    } else if(parameters.type == "e"){
+        int filledsize = tamparticiones(mbr); /// Obtiene todo el tama;o ocupado por las particiones ya existentes
+        if (newsize < (mbr.tamano - filledsize)){
+            Particion EmptPart;
+            for (int i = 0; i < 4; i++){
+                char* char_array = new char[16];
+                strcpy(char_array, parameters.nombre.c_str());
+                int result1 = strcmp(mbr.particiones[i].name, char_array);
+                if(result1 == 0){
+                    cout << "No se puede crear una particion con un nombre ya utilizado" << endl;
+                    return;
+                }
+                char newtype = 'e';
+                int result2 = strcmp(&mbr.particiones[i].type, &newtype);
+                if (result2 == 0){
+                    cout << "Solo se puede tener una particion de tipo extendida"<< endl;
+                    return;
+                }
+            }
+
+            for (int i = 0; i < 4; i++){
+                int result = strcmp(mbr.particiones[i].name, EmptPart.name);
+                if (result == 0){
+                    mbr.particiones[i] = ActivarParticion(mbr.particiones[i], parameters, newsize, startpoint);
+                    rewind(dsk);
+                    fwrite(&mbr, sizeof(MBR), 1, dsk);
+
+                    break;
+                }
+            }
+        }
+    }  else if(parameters.type == "l"){
+        Particion EmptPart;
+        Particion TempExt;
+
+        //tTerminar
+        for (int i = 0; i < 4; i++){
+            char newtype = 'e';
+            int result2 = strcmp(&mbr.particiones[i].type, &newtype);
+            if (result2 == 0){
+                TempExt = mbr.particiones[i];
+                return;
+            }
+
+            char* char_array = new char[16];
+            strcpy(char_array, parameters.nombre.c_str());
+            int result1 = strcmp(mbr.particiones[i].name, char_array);
+            if(result1 == 0){
+                cout << "No se puede crear una particion con un nombre ya utilizado" << endl;
+                return;
+            }
+        }
+
+        for (int i = 0; i < 4; i++){
+            int result = strcmp(mbr.particiones[i].name, EmptPart.name);
+            if (result == 0){
+                mbr.particiones[i] = ActivarParticion(mbr.particiones[i], parameters, newsize, startpoint);
+                rewind(dsk);
+                fwrite(&mbr, sizeof(MBR), 1, dsk);
+
+                break;
+            }
         }
     }
 
     fclose(dsk);
 }
+
+EBR Fdisk::ActivarEBR(Parametros parameters, int size, int startpoint, int nextEBR){
+    EBR oldPart;
+    for (int i = 0; i < sizeof(parameters.nombre); i++){
+        oldPart.name[i] = parameters.nombre[i];
+    }
+
+    oldPart.fit = parameters.fit[0];
+    oldPart.size = size;
+    oldPart.status = '1';
+    oldPart.start = startpoint;
+    oldPart.p_siguiente = nextEBR;
+
+    return oldPart;
+
+}
+
 
 Particion Fdisk::ActivarParticion(Particion oldPart, Parametros parameters, int size, int startpoint){
    
@@ -144,7 +229,6 @@ Particion Fdisk::ActivarParticion(Particion oldPart, Parametros parameters, int 
     for (int i = 0; i < sizeof(parameters.nombre); i++){
         oldPart.name[i] = parameters.nombre[i];
     }
-
 
     oldPart.fit = parameters.fit[0];
     oldPart.size = size;
@@ -155,19 +239,69 @@ Particion Fdisk::ActivarParticion(Particion oldPart, Parametros parameters, int 
     return oldPart;
 }
 
-int Fdisk::GetPositionFF(MBR mbrActual, int Tam){
+
+int Fdisk::GetPositionBF(MBR mbrActual, int Tam){
     int Pos;
-    MBR AllArrays;
-    bool Discovacio = true;
-
-    Pos = sizeof(mbrActual);
     int Posmbr = 0;
+    MBR AllArrays;
+    bool Discovacio = IstheDiskEmpty(mbrActual);
+    
+    if (Discovacio){
+        Pos = Pos + 1;
+        return Pos;
+    }
 
+    for (int i = 0; i < 4; i++){
+        if(mbrActual.particiones[i].status =='1'){
+            AllArrays.particiones[Posmbr] = (mbrActual.particiones[i]);
+            Posmbr += 1;
+        }
+    }
+
+    AllArrays = OrdenarArray(AllArrays);
+
+    int BestPosition = 0;
+
+    for (int i = 1; i < 4; i++){
+        Particion Actual = AllArrays.particiones[i];
+        Particion Anterior = AllArrays.particiones[i-1];
+
+        if(Actual.status != '0'){
+            int fin = Anterior.size + Anterior.start;
+            if(fin + Tam < Actual.start){
+                if (BestPosition != 0){
+                    if(fin - Actual.start < BestPosition)
+                        BestPosition = fin + Tam;
+                }else{
+                    BestPosition = fin + Tam;
+                }
+            }
+        }else{
+            return Anterior.size + Anterior.start;
+        }
+    }
+
+    return BestPosition;
+}
+
+bool Fdisk::IstheDiskEmpty(MBR mbrActual){
+
+    bool Discovacio = true;
     for (int i = 0; i < 4; i++){
         if (mbrActual.particiones[i].status =='1'){
             Discovacio = false;
+            return Discovacio;
         }
     }
+    return Discovacio;
+
+}
+
+int Fdisk::GetPositionFF(MBR mbrActual, int Tam){
+    int Pos;
+    int Posmbr = 0;
+    MBR AllArrays;
+    bool Discovacio = IstheDiskEmpty(mbrActual);
     
     if (Discovacio){
         Pos = Pos + 1;

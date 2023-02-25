@@ -1,3 +1,5 @@
 mkdisk >size=3000 >unit=K >path=/home/useer/Disco1.dsk
 
 fdisk >size=400 >unit=K >path=/home/useer/Disco1.dsk >name=Brotato3
+
+fdisk >type=E >size=300 >unit=K >fit=bf >path=/home/useer/Disco1.dsk >name=Brotato

@@ -30,6 +30,9 @@ void Reportes::GenerarReporte(string path){
     cout << "Size: " << mbr.tamano << endl;
     cout << "Fecha: " << mbr.fecha_creacion << endl;
     cout << "Signature: " << mbr.disk_signature  << endl;
+    cout << "Particion 1: " << mbr.particiones[0].name  << endl;
+    cout << "Particion 2: " << mbr.particiones[1].name << endl;
+    cout << "Particion 3: " << mbr.particiones[2].name  << endl;
 
 
 }

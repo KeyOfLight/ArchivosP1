@@ -85,8 +85,8 @@ void Ann::ReconocerComando(string comando, vector<string> parametros){
         }else{
         for (int i = 0; i < parametros.size(); i++){
                 param = parametros.at(i);
-                if(param.find("path=") == 0){
-                    param = replace_txt(param, "path=", "");
+                if(param.find(">path=") == 0){
+                    param = replace_txt(param, ">path=", "");
                     cmd.param.direccion = param;
                 }
             }
@@ -98,20 +98,20 @@ void Ann::ReconocerComando(string comando, vector<string> parametros){
 
         for (int i = 0; i < parametros.size(); i++){
             param = parametros.at(i);
-            if(param.find("size") == 0){
-                param = replace_txt(param, "size=", "");
+            if(param.find(">size") == 0){
+                param = replace_txt(param, ">size=", "");
                 param = replace_txt(param, "\"", "");
                 cmd.param.tam = param;
-            }else if(param.find("path") == 0){
-                param = replace_txt(param, "path=", "");
+            }else if(param.find(">path") == 0){
+                param = replace_txt(param, ">path=", "");
                 param = replace_txt(param, "\"", "");
                 cmd.param.direccion = param;
-            }else if(param.find("fit") == 0){
-                param = replace_txt(param, "fit=", "");
+            }else if(param.find(">fit") == 0){
+                param = replace_txt(param, ">fit=", "");
                 param = replace_txt(param, "\"", "");
                 cmd.param.fit = param;
-            }else if(param.find("unit") == 0){
-                param = replace_txt(param, "unit=", "");
+            }else if(param.find(">unit") == 0){
+                param = replace_txt(param, ">unit=", "");
                 param = replace_txt(param, "\"", "");
                 cmd.param.unit = param;
             }
@@ -124,8 +124,8 @@ void Ann::ReconocerComando(string comando, vector<string> parametros){
 
         for (int i = 0; i < parametros.size(); i++){
             param = parametros.at(i);
-            if(param.find("path") == 0){
-                param = replace_txt(param, "path=", "");
+            if(param.find(">path") == 0){
+                param = replace_txt(param, ">path=", "");
                 param = replace_txt(param, "\"", "");
                 cmd.param.direccion = param;
             }
@@ -135,36 +135,36 @@ void Ann::ReconocerComando(string comando, vector<string> parametros){
         cmd.nombre = ComandosNombre.fdisk;
         for (int i = 0; i < parametros.size(); i++){
             param = parametros.at(i);
-            if(param.find("size") == 0){
-                    param = replace_txt(param, "size=", "");
+            if(param.find(">size") == 0){
+                    param = replace_txt(param, ">size=", "");
                     param = replace_txt(param, "\"", "");
                     cmd.param.tam = param;
-            }else if(param.find("path") == 0){
-                    param = replace_txt(param, "path=", "");
+            }else if(param.find(">path") == 0){
+                    param = replace_txt(param, ">path=", "");
                     param = replace_txt(param, "\"", "");
                     cmd.param.direccion = param;
-            }else if(param.find("name") == 0){
-                    param = replace_txt(param, "name=", "");
+            }else if(param.find(">name") == 0){
+                    param = replace_txt(param, ">name=", "");
                     param = replace_txt(param, "\"", "");
                     cmd.param.nombre = param;
-            }else if(param.find("unit") == 0){
-                    param = replace_txt(param, "unit=", "");
+            }else if(param.find(">unit") == 0){
+                    param = replace_txt(param, ">unit=", "");
                     param = replace_txt(param, "\"", "");
                     cmd.param.unit = param;
-            }else if(param.find("type") == 0){
-                    param = replace_txt(param, "type=", "");
+            }else if(param.find(">type") == 0){
+                    param = replace_txt(param, ">type=", "");
                     param = replace_txt(param, "\"", "");
                     cmd.param.type = param;
-            }else if(param.find("fit") == 0){
-                    param = replace_txt(param, "fit=", "");
+            }else if(param.find(">fit") == 0){
+                    param = replace_txt(param, ">fit=", "");
                     param = replace_txt(param, "\"", "");
                     cmd.param.fit = param;
-            }else if(param.find("delete") == 0){
-                    param = replace_txt(param, "delete=", "");
+            }else if(param.find(">delete") == 0){
+                    param = replace_txt(param, ">delete=", "");
                     param = replace_txt(param, "\"", "");
                     cmd.param.del = param;
-            }else if(param.find("add") == 0){
-                    param = replace_txt(param, "add=", "");
+            }else if(param.find(">add") == 0){
+                    param = replace_txt(param, ">add=", "");
                     param = replace_txt(param, "\"", "");
                     cmd.param.add = param;
             }
@@ -174,12 +174,12 @@ void Ann::ReconocerComando(string comando, vector<string> parametros){
         cmd.nombre = ComandosNombre.rep;
         for (int i = 0; i < parametros.size(); i++){
             param = parametros.at(i);
-            if(param.find("name") == 0){
-                    param = replace_txt(param, "name=", "");
+            if(param.find(">name") == 0){
+                    param = replace_txt(param, ">name=", "");
                     param = replace_txt(param, "\"", "");
                     cmd.param.nombre = param;
-            }else if(param.find("path") == 0){
-                    param = replace_txt(param, "path=", "");
+            }else if(param.find(">path") == 0){
+                    param = replace_txt(param, ">path=", "");
                     param = replace_txt(param, "\"", "");
                     cmd.param.direccion = param;
             }
@@ -221,7 +221,7 @@ vector<string> Ann::split_txt(string text){ // Split para separar tipo de comand
     string segment;
     vector<string> splited;
     
-    while(getline(text_to_split, segment,'>')){
+    while(getline(text_to_split, segment,' ')){
        splited.push_back(segment);
     }
     return splited;
