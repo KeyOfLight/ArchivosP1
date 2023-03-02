@@ -33,8 +33,9 @@ int main(){
 
     } 
     
-
 }
+
+//Recuerda terminar el worstF
 
 void ingresarcomando(){
 

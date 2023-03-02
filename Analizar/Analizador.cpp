@@ -68,6 +68,7 @@ void Ann::ReconocerComando(string comando, vector<string> parametros){
     TiposDeComandos ComandosNombre;
     string separator = "";
     string ComandoSeparado;
+    Parametros emptParam;
 
     stringstream ss(comando);
 
@@ -183,11 +184,12 @@ void Ann::ReconocerComando(string comando, vector<string> parametros){
                     param = replace_txt(param, "\"", "");
                     cmd.param.direccion = param;
             }
-
         }
         report.GenerarReporte(cmd.param.direccion); //Ejecuta Generar Reporte
 
     }
+
+    cmd.param = emptParam;
 }
 
 void Ann::Execute(string dir){

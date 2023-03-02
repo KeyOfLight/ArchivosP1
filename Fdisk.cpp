@@ -1,5 +1,6 @@
 #include <iostream>
 #include "Estructuras.cpp"
+#include <bits/stdc++.h>
 #include "Compartido.cpp"
 #include <fstream>
 #include <vector>
@@ -12,12 +13,21 @@ public:
     bool existeDisco(string path);
     int tamparticiones(MBR TempMbr);
     Particion ActivarParticion(Particion oldPart, Parametros parameters, int size, int startpoint);
+    void EliminarParticion(Parametros parameters);
+    string convertToString(char* a, int size);
     
     int GetPositionFF(MBR mbrActual, int Tam);
     MBR OrdenarArray(MBR AllArrays);
     bool IstheDiskEmpty(MBR mbrActual);
     int GetPositionBF(MBR mbrActual, int Tam);
-    EBR ActivarEBR(Parametros parameters, int size, int startpoint, int nextEBR);
+    int CalcularSizeExt(int expart, Parametros parameters, int lpartsize);
+
+
+    EBR ActivarEBR(Parametros parameters, int size, int startpoint);
+    int GetPositionFFEbr(Particion PartExt, int Tam,Parametros parameters);
+    int GetPositionBFEbr(Particion PartExt, int Tam,Parametros parameters);
+
+    int SearchNameEBR(Particion PartExt, string Nombre, Parametros parameters);
 
     Comando cmd;
     Compartido compart;
@@ -42,8 +52,67 @@ bool Fdisk::existeDisco(string path)
     return true;
 }
 
+void Fdisk::EliminarParticion(Parametros parameters){
+
+    string path = parameters.direccion;
+    Particion empt;
+    MBR mbrActual;
+    FILE* dsk = fopen(path.c_str(), "rb+");
+    rewind(dsk);
+    fread(&mbrActual, sizeof(mbrActual), 1, dsk);
+
+    bool Discovacio = IstheDiskEmpty(mbrActual);
+    
+    if (Discovacio){
+        cout<< "No se pudo encontrar la particion deseada"<< endl;
+        return;
+    }
+
+    string s_a;
+
+    for (int i = 0; i < 4; i++){
+        if(mbrActual.particiones[i].status =='1'){
+            //Arreglar.
+            int tam = parameters.nombre.length();
+            s_a = convertToString(mbrActual.particiones[i].name, tam);
+            if(s_a == parameters.nombre){
+                string opcion;
+                cout << "La particion fue encontrada, desea eliminarla? (S/N)"<<endl;
+                cin >> opcion;
+                if(opcion == "S" or opcion == "s"){
+                        mbrActual.particiones[i] = empt;
+                        rewind(dsk);
+                        fwrite(&mbrActual, sizeof(MBR), 1, dsk);
+                        fclose(dsk);
+                        return;
+                }
+            }
+        }
+    }
+
+    cout<<"No se pudo encontrar la particion deseada"<<endl;
+    return;
+
+}
+
+string Fdisk::convertToString(char* a, int size)
+{
+    int i;
+    string s = "";
+    for (i = 0; i < size; i++) {
+        s = s + a[i];
+    }
+    return s;
+}
+ 
+
 void Fdisk::CrearParticion(Parametros parameters)
 { // Crea las particiones para los discos
+    if(parameters.del == "full"){
+        EliminarParticion(parameters);
+        return;
+    }
+
 
     int size_ = stoi(parameters.tam);
     string unidad = parameters.unit;
@@ -98,16 +167,20 @@ void Fdisk::CrearParticion(Parametros parameters)
 
     currentFit = compart.VerFit(parameters.fit);
 
-    if(currentFit == 0){//Best Fit
+    if(parameters.type == "p" or parameters.type == "" or parameters.type == "e"){
+
+        if(currentFit == 0){//Best Fit
         startpoint = GetPositionBF(mbr, newsize);
         parameters.fit = "b";
 
-    }else if(currentFit == 1){//First Fit
-        startpoint = GetPositionFF(mbr, newsize);
-        parameters.fit = "f";
+        }else if(currentFit == 1){//First Fit
+            startpoint = GetPositionFF(mbr, newsize);
+            parameters.fit = "f";
 
-    }else if(currentFit == 2){//Worst Fit
-        
+        }else if(currentFit == 2){//Worst Fit
+            
+
+        }
 
     }
 
@@ -170,18 +243,16 @@ void Fdisk::CrearParticion(Parametros parameters)
             }
         }
     }  else if(parameters.type == "l"){
-        Particion EmptPart;
+        EBR EmptEbr;
         Particion TempExt;
 
         //tTerminar
         for (int i = 0; i < 4; i++){
             char newtype = 'e';
-            int result2 = strcmp(&mbr.particiones[i].type, &newtype);
-            if (result2 == 0){
+            char typepart = mbr.particiones[i].type;
+            if (newtype == typepart){
                 TempExt = mbr.particiones[i];
-                return;
             }
-
             char* char_array = new char[16];
             strcpy(char_array, parameters.nombre.c_str());
             int result1 = strcmp(mbr.particiones[i].name, char_array);
@@ -191,13 +262,45 @@ void Fdisk::CrearParticion(Parametros parameters)
             }
         }
 
-        for (int i = 0; i < 4; i++){
-            int result = strcmp(mbr.particiones[i].name, EmptPart.name);
-            if (result == 0){
-                mbr.particiones[i] = ActivarParticion(mbr.particiones[i], parameters, newsize, startpoint);
-                rewind(dsk);
-                fwrite(&mbr, sizeof(MBR), 1, dsk);
+        //Verificar si existe una particion de tipo extendida
+        if(TempExt.status != '1'){
+            cout << "Para crear una particion logica es necesario que exista una particion extendida"<< endl;
+            return;
+        }
 
+        if(SearchNameEBR(TempExt, parameters.nombre, parameters)){
+            cout << "No se puede crear una particion logica con un nombre ya utilizado" << endl;
+            return;
+        }
+        
+        if(currentFit == 0){//Best Fit
+            startpoint = GetPositionFFEbr(TempExt, newsize, parameters);
+            parameters.fit = "b";
+
+        }else if(currentFit == 1){//First Fit
+
+            startpoint = GetPositionFFEbr(TempExt, newsize, parameters);
+            parameters.fit = "f";
+
+        }else if(currentFit == 2){//Worst Fit
+
+        }
+
+        int libre = (TempExt.size - CalcularSizeExt(TempExt.start, parameters, 0)) - newsize;
+        if(libre < 0){
+            cout << "El espacio restante en el disco no es suficiente para almacenar esta particion logica"<< endl;
+            return;
+        }
+
+        for (int i = 0; i < 4; i++){
+            char newtype = 'e';
+            char typepart = mbr.particiones[i].type;
+            if (newtype == typepart){
+                EmptEbr = ActivarEBR(parameters, newsize, startpoint);
+                EBR tempo2;
+                rewind(dsk);
+                fseek(dsk, startpoint, SEEK_SET);
+                fwrite(&EmptEbr, sizeof(EBR), 1, dsk);
                 break;
             }
         }
@@ -206,8 +309,29 @@ void Fdisk::CrearParticion(Parametros parameters)
     fclose(dsk);
 }
 
-EBR Fdisk::ActivarEBR(Parametros parameters, int size, int startpoint, int nextEBR){
+int Fdisk::CalcularSizeExt(int start,Parametros parameters, int ocupado){
+
+    string path = parameters.direccion;
+    int Occupied = ocupado;
+    FILE* dsk = fopen(path.c_str(), "rb+");
+    EBR tempebr;
+    int startpoint = start;
+    fseek(dsk, startpoint, SEEK_SET);
+
+
+    fread(&tempebr, sizeof(tempebr), 1, dsk);
+
+    if(tempebr.status == '1'){  
+        Occupied =+ tempebr.size;
+        CalcularSizeExt(tempebr.p_siguiente, parameters, Occupied);
+    }
+
+    return Occupied;
+}
+
+EBR Fdisk::ActivarEBR(Parametros parameters, int size, int startpoint){
     EBR oldPart;
+
     for (int i = 0; i < sizeof(parameters.nombre); i++){
         oldPart.name[i] = parameters.nombre[i];
     }
@@ -216,7 +340,7 @@ EBR Fdisk::ActivarEBR(Parametros parameters, int size, int startpoint, int nextE
     oldPart.size = size;
     oldPart.status = '1';
     oldPart.start = startpoint;
-    oldPart.p_siguiente = nextEBR;
+    oldPart.p_siguiente = -1;
 
     return oldPart;
 
@@ -273,7 +397,7 @@ int Fdisk::GetPositionBF(MBR mbrActual, int Tam){
                     if(fin - Actual.start < BestPosition)
                         BestPosition = fin + Tam;
                 }else{
-                    BestPosition = fin + Tam;
+                    BestPosition = fin;
                 }
             }
         }else{
@@ -371,4 +495,191 @@ int Fdisk::tamparticiones(MBR TempMBR){ // Se obtiene el tama;o de todas las par
     }
 
     return totalsize;
+}
+
+
+int Fdisk::GetPositionFFEbr(Particion PartExt, int Tam,Parametros parameters){//Devuleve la primera posicion disponible en el EBR
+    int Pos = 0;
+    int Posmbr = 0;
+    bool Discovacio = false;
+
+    string path = parameters.direccion;
+    int Occupied = 0;
+    FILE* dsk = fopen(path.c_str(), "rb+");
+    EBR tempebr;
+    int startpoint = PartExt.start;
+
+    int Vacio = CalcularSizeExt(startpoint, parameters, 0);
+
+    if( Vacio == 0){
+        Discovacio = true;
+    }
+    
+    if (Discovacio){
+        Pos = startpoint;
+        return Pos;
+    }
+    fseek(dsk, startpoint, SEEK_SET);
+    fread(&tempebr, sizeof(tempebr), 1, dsk);
+
+    while ((tempebr.status == '1')){
+       Posmbr += 1;
+       fseek(dsk, tempebr.p_siguiente, SEEK_SET);
+       fread(&tempebr, sizeof(tempebr), 1, dsk);
+    }
+
+    if(Posmbr == 0){
+        return startpoint;
+    }
+
+    EBR lista[Posmbr];
+    Posmbr = 0;
+    fseek(dsk, startpoint, SEEK_SET);
+    fread(&tempebr, sizeof(tempebr), 1, dsk);
+
+    while (tempebr.status == '1'){
+        lista[Posmbr] = tempebr;
+        Posmbr =+ 1;
+        fseek(dsk, tempebr.p_siguiente, SEEK_SET);
+        fread(&tempebr, sizeof(tempebr), 1, dsk);
+    }
+
+    EBR AllArrays[Posmbr];
+    memcpy(AllArrays, lista, sizeof(EBR));
+    int n = Posmbr;
+    int i,j;
+    EBR temp[n];
+    int postemp = 0;
+
+    for(i=1;i<n;i++)
+        for(j=n-1;j>=i;j--)
+            if(AllArrays[j-1].start > AllArrays[j].start and AllArrays[j-1].start != 0 and AllArrays[j].start != 0){
+            temp[postemp]=AllArrays[j-1];
+            AllArrays[j-1]=AllArrays[j];
+            AllArrays[j]=temp[postemp];
+            postemp += 1;
+        }
+
+    for (int i = 1; i < Posmbr; i++){
+        EBR Actual = AllArrays[i];
+        EBR Anterior = AllArrays[i-1];
+
+        if(Actual.status == '1'){
+            int fin = Anterior.size + Anterior.start;
+            if(fin + Tam < Actual.start){
+                return fin;
+            }
+        }else{
+            return Anterior.size + Anterior.start;
+        }
+    }
+    
+    return AllArrays[0].start + AllArrays[0].size;
+}
+
+int Fdisk::SearchNameEBR(Particion PartExt, string Nombre, Parametros parameters){//Busca coincidencia con el nombre enviado, retorna 1 si lo encuentra
+    string path = parameters.direccion;
+    int Occupied = 0;
+    FILE* dsk = fopen(path.c_str(), "rb+");
+    EBR tempebr;
+    int startpoint = PartExt.start;
+
+    fseek(dsk, startpoint, SEEK_SET);
+    fread(&tempebr, sizeof(tempebr), 1, dsk);
+
+    while ((tempebr.status == '1')){
+        if(tempebr.name == Nombre)
+            return 1;
+       fseek(dsk, tempebr.p_siguiente, SEEK_SET);
+       fread(&tempebr, sizeof(tempebr), 1, dsk);
+    }
+
+    return 0;
+
+}
+
+int Fdisk::GetPositionBFEbr(Particion PartExt, int Tam,Parametros parameters){//Devuleve la mejor posicion disponible en el EBR
+    int Pos = 0;
+    int Posmbr = 0;
+    bool Discovacio = false;
+
+    string path = parameters.direccion;
+    int Occupied = 0;
+    FILE* dsk = fopen(path.c_str(), "rb+");
+    EBR tempebr;
+    int startpoint = PartExt.start;
+
+    int Vacio = CalcularSizeExt(startpoint, parameters, 0);
+
+    if( Vacio == 0){
+        Discovacio = true;
+    }
+    
+    if (Discovacio){
+        Pos = startpoint;
+        return Pos;
+    }
+    fseek(dsk, startpoint, SEEK_SET);
+    fread(&tempebr, sizeof(tempebr), 1, dsk);
+
+    while ((tempebr.status == '1')){
+       Posmbr += 1;
+       fseek(dsk, tempebr.p_siguiente, SEEK_SET);
+       fread(&tempebr, sizeof(tempebr), 1, dsk);
+    }
+
+    if(Posmbr == 0){
+        return startpoint;
+    }
+
+    EBR lista[Posmbr];
+    Posmbr = 0;
+    fseek(dsk, startpoint, SEEK_SET);
+    fread(&tempebr, sizeof(tempebr), 1, dsk);
+
+    while (tempebr.status == '1'){
+        lista[Posmbr] = tempebr;
+        Posmbr =+ 1;
+        fseek(dsk, tempebr.p_siguiente, SEEK_SET);
+        fread(&tempebr, sizeof(tempebr), 1, dsk);
+    }
+
+    EBR AllArrays[Posmbr];
+    memcpy(AllArrays, lista, sizeof(EBR));
+    int n = Posmbr;
+    int i,j;
+    EBR temp[n];
+    int postemp = 0;
+
+    for(i=1;i<n;i++)
+        for(j=n-1;j>=i;j--)
+            if(AllArrays[j-1].start > AllArrays[j].start and AllArrays[j-1].start != 0 and AllArrays[j].start != 0){
+            temp[postemp]=AllArrays[j-1];
+            AllArrays[j-1]=AllArrays[j];
+            AllArrays[j]=temp[postemp];
+            postemp += 1;
+        }
+
+    int BestPosition;
+    BestPosition = startpoint;
+    for (int i = 1; i < 4; i++){
+        EBR Actual = AllArrays[i];
+        EBR Anterior = AllArrays[i-1];
+
+        if(Actual.status != '0'){
+            int fin = Anterior.size + Anterior.start;
+            if(fin + Tam < Actual.start){
+                if (BestPosition != 0){
+                    if(fin - Actual.start < BestPosition)
+                        BestPosition = fin;
+                }else{
+                    BestPosition = fin;
+                }
+            }
+        }else{
+            return BestPosition;
+        }
+    }
+
+    return BestPosition;
 }

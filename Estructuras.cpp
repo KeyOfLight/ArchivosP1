@@ -41,7 +41,7 @@ struct EBR {
     char    fit = ' ';      //Indica el tipo de ajuste que se utiliza (B,F,W)
     int     start = 0;      //Indica la posicion donde empiza la particion
     int     size = 0;       //Indica el tam;ao de la particion
-    int     p_siguiente;    // Indica el byte en el que esta la proxima particion
+    int     p_siguiente = 0;    // Indica el byte en el que esta la proxima particion
     char    name[16] = "";  //indica el nobmre de la particion
     
 };
