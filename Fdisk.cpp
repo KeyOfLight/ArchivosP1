@@ -14,7 +14,6 @@ public:
     int tamparticiones(MBR TempMbr);
     Particion ActivarParticion(Particion oldPart, Parametros parameters, int size, int startpoint);
     void EliminarParticion(Parametros parameters);
-    string convertToString(char* a, int size);
     
     int GetPositionFF(MBR mbrActual, int Tam);
     MBR OrdenarArray(MBR AllArrays);
@@ -75,7 +74,7 @@ void Fdisk::EliminarParticion(Parametros parameters){
     for (int i = 0; i < 4; i++){
         if(mbrActual.particiones[i].status =='1'){
             int tam = parameters.nombre.length();
-            s_a = convertToString(mbrActual.particiones[i].name, tam);
+            s_a = compart.convertToString(mbrActual.particiones[i].name, tam);
             if(mbrActual.particiones[i].type == 'e'){
                 extstart = mbrActual.particiones[i].start;
             }
@@ -93,6 +92,7 @@ void Fdisk::EliminarParticion(Parametros parameters){
                         fclose(dsk);
                         return;
                 }
+                return;
             }
         }
     }
@@ -123,13 +123,13 @@ void Fdisk::EliminarPartL(int startpoint, bool Completo, string name, string dir
             int next = tempebr.p_siguiente;
             fwrite(&empt, sizeof(EBR), 1, dsk);
             fclose(dsk);
-            if(tempebr.p_siguiente != -1)
+            if(next != -1)
                 EliminarPartL(next, Completo, name, dir);
         }
 
     }else{
         int tam = name.length();
-        s_a = convertToString(tempebr.name, tam);
+        s_a = compart.convertToString(tempebr.name, tam);
         if(s_a == name){
             string opcion;
             cout << "La particion fue encontrada, desea eliminarla? (S/N)"<<endl;
@@ -150,16 +150,6 @@ void Fdisk::EliminarPartL(int startpoint, bool Completo, string name, string dir
     }
 
     return;
-}
-
-string Fdisk::convertToString(char* a, int size)
-{
-    int i;
-    string s = "";
-    for (i = 0; i < size; i++) {
-        s = s + a[i];
-    }
-    return s;
 }
  
 
@@ -805,7 +795,7 @@ void Fdisk::AddSpace(Parametros parameters){
     for (int i = 0; i < 4; i++){
         if(mbrActual.particiones[i].status =='1'){
             int tam = parameters.nombre.length();
-            s_a = convertToString(mbrActual.particiones[i].name, tam);
+            s_a = compart.convertToString(mbrActual.particiones[i].name, tam);
             if(mbrActual.particiones[i].type == 'e'){
                 extstart = mbrActual.particiones[i].start;
                 maxsize = mbrActual.particiones[i].size;
@@ -862,7 +852,7 @@ void Fdisk::AddLogic(int startpoint, int Maxsize, string name, string dir, int a
     string s_a;
     fread(&tempebr, sizeof(tempebr), 1, dsk);
     int tam = name.length();
-    s_a = convertToString(tempebr.name, tam);
+    s_a = compart.convertToString(tempebr.name, tam);
 
     if(s_a == name){
         string opcion;
@@ -886,7 +876,9 @@ void Fdisk::AddLogic(int startpoint, int Maxsize, string name, string dir, int a
                     return;
                 }
                 cout<< "No se puede hacer esta modificacion de espacio"<< endl;
+                return;
         }
+        return;
     }else if(tempebr.p_siguiente != -1){
         AddLogic(tempebr.p_siguiente, Maxsize, name, dir, add);
         return;

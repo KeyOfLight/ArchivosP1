@@ -47,5 +47,5 @@ void ingresarcomando(){
     cin.ignore(numeric_limits<int>::max(),'\n');
     getline(cin,useramne);
     
-    Montadas.push_back(analisis.Analizar(useramne));
+    analisis.Analizar(useramne);
 }

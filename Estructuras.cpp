@@ -16,13 +16,12 @@ struct Parametros //Parametros de todos los comandos que se van a utilizar
     string unit;
     string fit;
     string nombre;
-    string    status;
-    string    type;
-    string     start;
-    string     size ;
+    string status;
+    string type;
+    string start;
+    string size ;
     string del;
     string add;
-
 
 };
 
@@ -59,9 +58,10 @@ struct Fits {
 };
 
 struct Mounter {
+    string id;
     string name;
     string path;
-    int startpoint;
+    int startpoint = 0;
 };
 
 class Comando //Clase que tiene toda la informacion para guardar un comando

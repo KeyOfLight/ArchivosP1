@@ -10,6 +10,7 @@
 #include "../Reportes.cpp"
 #include "../Rmdisk.cpp"
 #include "../Fdisk.cpp"
+#include "../Mount.cpp"
 
 using namespace std;
 
@@ -26,6 +27,7 @@ public:
     Reportes report;
     Rmdisk remover;
     Fdisk Part;
+    Mount Montador;
 
     vector<Mounter> mounted;
 };
@@ -37,6 +39,7 @@ struct TiposDeComandos  //Listado de comandos que se utilizan en el proyecto
     string rep = "Rep";
     string Remove = "RMDisk";
     string fdisk = "FDisk";
+    string Mount = "Mount";
 };
 
 
@@ -167,6 +170,37 @@ void Ann::ReconocerComando(string comando, vector<string> parametros){
             }
         }
         Part.CrearParticion(cmd.param);
+    }else if(ComandoSeparado == "mount"){//////////////////////// Mount
+        cmd.nombre = ComandosNombre.Mount;
+        for (int i = 0; i < parametros.size(); i++){
+            param = parametros.at(i);
+            if(param.find(">path") == 0){
+                param = replace_txt(param, ">path=", "");
+                param = replace_txt(param, "\"", "");
+                cmd.param.direccion = param;
+            }else if(param.find(">name") == 0){
+                param = replace_txt(param, ">name=", "");
+                param = replace_txt(param, "\"", "");
+                cmd.param.nombre = param;
+            }
+        }
+        Mounter tempmount;
+        tempmount = Montador.Montar(cmd.param.direccion, cmd.param.nombre);    ///////////////////Ejecutar Montar
+        if(tempmount.id != "")
+            mounted.push_back(tempmount);
+
+    }else if(ComandoSeparado == "unmount"){//////////////////////// Unmount
+        cmd.nombre = ComandosNombre.Mount;
+        for (int i = 0; i < parametros.size(); i++){
+            param = parametros.at(i);
+            if(param.find(">id") == 0){
+                param = replace_txt(param, ">id=", "");
+                param = replace_txt(param, "\"", "");
+                cmd.param.nombre = param;
+            }
+        }
+        mounted = (Montador.Unmount(cmd.param.nombre, mounted));    ///////////////////Ejecutar Montar
+
     }else if(ComandoSeparado == "rep"){/////////////////////////////////// Rep
         cmd.nombre = ComandosNombre.rep;
         for (int i = 0; i < parametros.size(); i++){

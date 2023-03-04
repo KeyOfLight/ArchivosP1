@@ -8,6 +8,7 @@ class Compartido{
 public:
     int VerFit(string Actualfit);
     int realsize(int tam, string unidad);
+    string convertToString(char* a, int size);
 };
 
 
@@ -42,4 +43,15 @@ int Compartido::realsize(int tam, string unidad){
     }
 
     return newsize;
+};
+
+
+string Compartido::convertToString(char* a, int size)
+{
+    int i;
+    string s = "";
+    for (i = 0; i < size; i++) {
+        s = s + a[i];
+    }
+    return s;
 };
