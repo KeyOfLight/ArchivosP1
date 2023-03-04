@@ -7,6 +7,7 @@ using namespace std;
 class Compartido{
 public:
     int VerFit(string Actualfit);
+    int realsize(int tam, string unidad);
 };
 
 
@@ -27,4 +28,18 @@ int Compartido::VerFit(string Actualfit){
         
     }
     return 1;
+};
+
+int Compartido::realsize(int tam, string unidad){
+
+    int newsize;
+    if(unidad.find("k") == 0){
+        newsize = tam * 1024;
+    }else if(unidad.find("m") == 0){
+        newsize = tam * 1024 * 1024;
+    }else {
+        newsize = tam * 1024 * 1024;
+    }
+
+    return newsize;
 };

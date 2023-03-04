@@ -58,6 +58,11 @@ struct Fits {
     vector <string> FitType = {"bf","ff","wf"};
 };
 
+struct Mounter {
+    string name;
+    string path;
+    int startpoint;
+};
 
 class Comando //Clase que tiene toda la informacion para guardar un comando
 {

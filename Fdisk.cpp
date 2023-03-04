@@ -27,7 +27,7 @@ public:
     EBR GetPositionFFEbr(Particion PartExt, int Tam,Parametros parameters);
     EBR GetPositionBFEbr(Particion PartExt, int Tam,Parametros parameters);
     void EliminarPartL(int startpoint, bool Completo, string name, string path);
-    void AddLogic(int startpoint, int maxsize, string name, string path);
+    void AddLogic(int startpoint, int maxsize, string name, string path, int add);
 
     int SearchNameEBR(Particion PartExt, string Nombre, Parametros parameters);
 
@@ -169,11 +169,13 @@ void Fdisk::CrearParticion(Parametros parameters)
         EliminarParticion(parameters);
         return;
     }
-
-    if(stoi(parameters.add) > 0){
-        AddSpace(parameters);
-        return;
+    if(parameters.add != ""){
+        if(stoi(parameters.add) != 0){
+            AddSpace(parameters);
+            return;
+        }   
     }
+    
 
 
     int size_ = stoi(parameters.tam);
@@ -518,7 +520,7 @@ int Fdisk::GetPositionFF(MBR mbrActual, int Tam){
     
 
     
-    return 0;
+    return AllArrays.particiones[0].size + AllArrays.particiones[0].start;
 }
 
 
@@ -792,6 +794,8 @@ void Fdisk::AddSpace(Parametros parameters){
     fread(&mbrActual, sizeof(mbrActual), 1, dsk);
     int extstart = 0;
     bool Discovacio = IstheDiskEmpty(mbrActual);
+
+    parameters.add = to_string(compart.realsize(stoi(parameters.add), parameters.unit));
     
     if (Discovacio){
         cout<< "No se pudo encontrar la particion deseada"<< endl;
@@ -840,7 +844,7 @@ void Fdisk::AddSpace(Parametros parameters){
     }
 
     if(extstart != 0){
-        AddLogic(extstart, maxsize, parameters.nombre, path);
+        AddLogic(extstart, maxsize, parameters.nombre, path, stoi(parameters.add));
         return;
     }
 
@@ -848,7 +852,7 @@ void Fdisk::AddSpace(Parametros parameters){
     return;
 }
 
-void Fdisk::AddLogic(int startpoint, int Maxsize, string name, string dir){
+void Fdisk::AddLogic(int startpoint, int Maxsize, string name, string dir, int add){
 
     string path = dir;
     EBR empt;
@@ -865,14 +869,26 @@ void Fdisk::AddLogic(int startpoint, int Maxsize, string name, string dir){
         cout << "La particion fue encontrada, agregar el espacio? (S/N)"<<endl;
         cin >> opcion;
         if(opcion == "S" or opcion == "s"){
-                tempebr = empt;
-                rewind(dsk);
-                fwrite(&tempebr, sizeof(EBR), 1, dsk);
-                fclose(dsk);
-                return;
+                if(tempebr.p_siguiente != -1){
+                    if(tempebr.size + add < tempebr.p_siguiente){
+                        tempebr.size = tempebr.size + add;
+                        fseek(dsk, startpoint, SEEK_SET);
+                        fwrite(&tempebr, sizeof(EBR), 1, dsk);
+                        fclose(dsk);
+                        return;
+                    }
+                }
+                if(tempebr.size + add < Maxsize && tempebr.size + add > 0){
+                    tempebr.size = tempebr.size + add;
+                    fseek(dsk, startpoint, SEEK_SET);
+                    fwrite(&tempebr, sizeof(EBR), 1, dsk);
+                    fclose(dsk);
+                    return;
+                }
+                cout<< "No se puede hacer esta modificacion de espacio"<< endl;
         }
     }else if(tempebr.p_siguiente != -1){
-        AddLogic(tempebr.p_siguiente, Maxsize, name, dir);
+        AddLogic(tempebr.p_siguiente, Maxsize, name, dir, add);
         return;
     }else{
         cout<< "No se pudo encontrar la particion deseada"<<endl;

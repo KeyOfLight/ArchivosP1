@@ -11,7 +11,6 @@
 #include "../Rmdisk.cpp"
 #include "../Fdisk.cpp"
 
-
 using namespace std;
 
 class Ann{
@@ -21,14 +20,14 @@ public:
     void ReconocerComando(string comando, vector<string> parametros);
     string replace_txt(string str, const string& from, const string& to);
     void Execute(string dir);
-
+    //
     Comando cmd;
     Comandos procesar;
     Reportes report;
     Rmdisk remover;
-    Fdisk Particion;
+    Fdisk Part;
 
-
+    vector<Mounter> mounted;
 };
 
 struct TiposDeComandos  //Listado de comandos que se utilizan en el proyecto
@@ -69,14 +68,11 @@ void Ann::ReconocerComando(string comando, vector<string> parametros){
     string separator = "";
     string ComandoSeparado;
     Parametros emptParam;
-
     stringstream ss(comando);
 
     while(getline(ss, comando, ' ')){
         ComandoSeparado = comando;
         }
-
-
 
     if(ComandoSeparado == "execute"){///////////////////execute
         cmd.nombre = ComandosNombre.Execute;
@@ -170,7 +166,7 @@ void Ann::ReconocerComando(string comando, vector<string> parametros){
                     cmd.param.add = param;
             }
         }
-        Particion.CrearParticion(cmd.param);
+        Part.CrearParticion(cmd.param);
     }else if(ComandoSeparado == "rep"){/////////////////////////////////// Rep
         cmd.nombre = ComandosNombre.rep;
         for (int i = 0; i < parametros.size(); i++){

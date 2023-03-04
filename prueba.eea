@@ -10,6 +10,8 @@ fdisk >type=l  >size=300 >unit=K >fit=ff >path=/home/useer/Disco1.dsk >name=puta
 
 fdisk >type=l  >size=300 >unit=K >fit=ff >path=/home/useer/Disco1.dsk >name=puta3
 
+fdisk >add=-500 >size=10 >unit=K >path=/home/useer/Disco1.dsk >name=puta3
+
 fdisk >delete=full >name=Brotato2 >path=/home/useer/Disco1.dsk
 
 fdisk >size=400 >unit=K >path=/home/useer/Disco1.dsk >name=Brotato3
