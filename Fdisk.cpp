@@ -425,7 +425,7 @@ int Fdisk::GetPositionBF(MBR mbrActual, int Tam){
     bool Discovacio = IstheDiskEmpty(mbrActual);
     
     if (Discovacio){
-        Pos = Pos + 1;
+        Pos = sizeof(MBR) + 1;
         return Pos;
     }
 
@@ -482,7 +482,7 @@ int Fdisk::GetPositionFF(MBR mbrActual, int Tam){
     bool Discovacio = IstheDiskEmpty(mbrActual);
     
     if (Discovacio){
-        Pos = Pos + 1;
+        Pos = sizeof(MBR) + 1;
         return Pos;
     }
     

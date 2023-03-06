@@ -22,6 +22,7 @@ struct Parametros //Parametros de todos los comandos que se van a utilizar
     string size ;
     string del;
     string add;
+    string fs;
 
 };
 
@@ -62,6 +63,70 @@ struct Mounter {
     string name;
     string path;
     int startpoint = 0;
+    int size = 0;
+    char type = ' ';
+};
+
+struct I_node {
+    int i_uid;
+    int i_gid;
+    int i_size;
+    time_t i_atime;
+    time_t i_ctime;
+    time_t i_mtime;
+    int i_block;
+    char i_type;
+    int i_perm;
+};
+
+struct Sblock{
+
+    int s_filesystem_type;
+    int s_inodes_count;
+    int s_blocks_count;
+    int s_free_blocks_count;
+    int s_free_inodes_count;
+    time_t s_mtime;
+    time_t s_umtime;
+    int s_mnt_count ;
+    int s_magic;
+    int s_inode_size;
+    int s_block_size;
+    int s_firts_ino;
+    int s_first_blo;
+    int s_bm_inode_start;
+    int s_bm_block_start;
+    int s_inode_start;
+    int s_block_start;
+};
+
+struct Content{
+    char b_name[12];
+    int b_inodo;
+};
+
+struct BloqueCarpetas{
+    Content b_content[4];
+};
+
+struct Journal{
+    int estado;
+    char tipo_op[10];
+    int type;
+    char path[100];
+    char fecha_op[25];
+    char contenido[100];
+    char id_propietario;
+    int tam; 
+
+};
+
+struct BloqueArchivos{
+    char b_content[64];
+};
+
+struct BloqueApuntadores{
+    int b_pointers[16];
 };
 
 class Comando //Clase que tiene toda la informacion para guardar un comando

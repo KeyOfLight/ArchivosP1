@@ -38,8 +38,10 @@ Mounter Mount::Montar(string path, string nombre){
             if(s_a == nombre){
                 Montado.id = "27"+i+nombre;
                 Montado.name = nombre;
+                Montado.size = mbrActual.particiones[i].size;
                 Montado.path = path;
                 Montado.startpoint = mbrActual.particiones[i].start;
+                Montado.type = mbrActual.particiones[i].type;
 
                 cout<<"El id de la particion es: " + Montado.id <<endl;
                 return Montado;
@@ -71,7 +73,9 @@ Mounter Mount::MontarEBR(string dir, string nombre, int startpoint, int ite){
         Montado.id = "27"+ite+nombre;
         Montado.name = nombre;
         Montado.path = path;
+        Montado.size = tempebr.size;
         Montado.startpoint = tempebr.start;
+        Montado.type = 'l';
         cout<<"El id de la particion es: " + Montado.id <<endl;
         return Montado;
     }else if(tempebr.p_siguiente != -1){
