@@ -9,7 +9,7 @@ using namespace std;
 class Mkfs{
     public:
 
-    void StartMkfs(vector<Mounter> Montados, string Id);
+    void StartMkfs(vector<Mounter> Montados, Parametros parameters);
     void CreateExt2(Mounter Particion);
     void CreateExt3(Mounter Particion);
 
@@ -63,8 +63,8 @@ void Mkfs::CreateExt2(Mounter Particion){
     SupBlock.s_blocks_count = num_block;
     SupBlock.s_free_inodes_count = Estructs_Num-2;
     SupBlock.s_free_blocks_count = num_block-2;
-    SupBlock.s_mtime = fechayhora;
-    SupBlock.s_umtime = time(nullptr);
+    strcpy(SupBlock.s_mtime, fechayhora);
+    strcpy(SupBlock.s_umtime, fechayhora);
     SupBlock.s_mnt_count = 0;
     SupBlock.s_magic = 0xEF53;
     SupBlock.s_inode_size = sizeof(I_node);
@@ -99,17 +99,12 @@ void Mkfs::CreateExt2(Mounter Particion){
         fseek(dsk, startpoint, SEEK_SET);
     }
 
-
-        
-
-
-
     fwrite(&SupBlock, sizeof(Sblock), 1, dsk);
 
     //Seek inodos
 
-    char inodos[n];
-    char bloques[3 * n];
+    char inodos[int(n)];
+    char bloques[3 * int(n)];
 
     for (int i = 0; i < n; i++)
     {
@@ -197,7 +192,7 @@ void Mkfs::CreateExt2(Mounter Particion){
     fseek(dsk, SupBlock.s_block_start + sizeof(BloqueCarpetas), SEEK_SET);
     fwrite(&bl_archivo, sizeof(BloqueArchivos), 1, dsk);
 
-    cout << "Particion \"" << montada.id << " | " << montada.name << " | " << montada.path << "\" formateada en EXT2" << endl;
+    cout << "Particion formateada en EXT2" << endl;
 
     fclose(dsk);
 
@@ -212,6 +207,7 @@ void Mkfs::CreateExt3(Mounter Particion){
     time_t t;
     struct tm *tm;
     char fechayhora[20];
+    char nulo = '0';
 
     t = time(NULL);
     tm = localtime(&t);
@@ -240,8 +236,8 @@ void Mkfs::CreateExt3(Mounter Particion){
     SupBlock.s_blocks_count = num_block;
     SupBlock.s_free_inodes_count = Estructs_Num-2;
     SupBlock.s_free_blocks_count = num_block-2;
-    SupBlock.s_mtime = fechayhora;
-    SupBlock.s_umtime = time(nullptr);
+    strcpy(SupBlock.s_mtime, fechayhora);
+    strcpy(SupBlock.s_umtime, fechayhora);
     SupBlock.s_mnt_count = 1;
     SupBlock.s_magic = 0xEF53;
     SupBlock.s_inode_size = sizeof(I_node);
@@ -257,12 +253,25 @@ void Mkfs::CreateExt3(Mounter Particion){
         SupBlock.s_bm_inode_start = startpoint + int(sizeof(Sblock)) + n * sizeof(Journal)+ sizeof(EBR);
         SupBlock.s_bm_block_start = startpoint + int(sizeof(Sblock)) + Estructs_Num+ sizeof(EBR);
         SupBlock.s_inode_start = startpoint + int(sizeof(Sblock)) + Estructs_Num + num_block+ sizeof(EBR);
+
+        for (int i = 0; i < Particion.size - sizeof(EBR); i++){
+            fwrite(&nulo, sizeof(nulo), 1, dsk);
+            fseek(dsk, PosSupB + i, SEEK_SET);
+        }
+
         fseek(dsk, PosSupB, SEEK_SET);
     }else {
+
         SupBlock.s_block_start = startpoint + int(sizeof(Sblock)) + Estructs_Num + num_block + (int(sizeof(I_node))*Estructs_Num);
         SupBlock.s_bm_inode_start = startpoint + int(sizeof(Sblock)) + n * sizeof(Journal);
         SupBlock.s_bm_block_start = startpoint + int(sizeof(Sblock)) + Estructs_Num;
         SupBlock.s_inode_start = startpoint + int(sizeof(Sblock)) + Estructs_Num + num_block;
+
+        for (int i = 0; i < Particion.size; i++){
+            fwrite(&nulo, sizeof(nulo), 1, dsk);
+            fseek(dsk, PosSupB + i, SEEK_SET);
+        }
+
         fseek(dsk, PosSupB, SEEK_SET);
     }
     
@@ -272,30 +281,30 @@ void Mkfs::CreateExt3(Mounter Particion){
     journal.estado = 0;
     journal.fecha_op[0] = '\0';
     journal.path[0] = '\0';
-    journal.tipo = -1;
+    journal.type = -1;
     strcpy(journal.contenido, "--");
-    journal.tamanio = 0;
+    journal.tam = 0;
     journal.tipo_op[0] = '\0';
 
     //journal de la carpeta
     Journal journalCarpeta;
     journalCarpeta.estado = 1;
     strcpy(journalCarpeta.tipo_op, "mkfs");
-    strcpy(journalCarpeta.fecha_op, fechaActual);
+    strcpy(journalCarpeta.fecha_op, fechayhora);
     strcpy(journalCarpeta.path, "/");
     journalCarpeta.id_propietario = '1';
     strcpy(journalCarpeta.contenido, "-");
-    journalCarpeta.tipo = '0';
+    journalCarpeta.type = '0';
 
     //journal del archivo
     Journal journalArchivo;
     journalArchivo.estado = 1;
     strcpy(journalArchivo.tipo_op, "mkfs");
-    strcpy(journalArchivo.fecha_op, fechaActual);
+    strcpy(journalArchivo.fecha_op, fechayhora);
     strcpy(journalArchivo.path, "/users.txt");
     journalArchivo.id_propietario = '1';
     strcpy(journalArchivo.contenido, "1,G,root\n1,U,root,root,123\n");
-    journalArchivo.tipo = '1';
+    journalArchivo.type = '1';
 
 
     for (int i = 0; i < n; i++){
@@ -313,8 +322,8 @@ void Mkfs::CreateExt3(Mounter Particion){
         }
     }
 
-    char inodos[n];
-    char bloques[3 * n];
+    char inodos[int(n)];
+    char bloques[3 * int(n)];
 
     for (int i = 0; i < n; i++)
     {
@@ -402,7 +411,7 @@ void Mkfs::CreateExt3(Mounter Particion){
     fseek(dsk, SupBlock.s_block_start + sizeof(BloqueCarpetas), SEEK_SET);
     fwrite(&bl_archivo, sizeof(BloqueArchivos), 1, dsk);
 
-    cout << "Particion \"" << montada.id << " | " << montada.name << " | " << montada.path << "\" formateada en EXT3" << endl;
+    cout << "Particion formateada en EXT3" << endl;
 
     fclose(dsk);
 

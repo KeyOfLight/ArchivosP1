@@ -71,10 +71,10 @@ struct I_node {
     int i_uid;
     int i_gid;
     int i_size;
-    time_t i_atime;
-    time_t i_ctime;
-    time_t i_mtime;
-    int i_block;
+    char i_atime[20];
+    char i_ctime[20];
+    char i_mtime[20];
+    int i_block[15];
     char i_type;
     int i_perm;
 };
@@ -86,8 +86,8 @@ struct Sblock{
     int s_blocks_count;
     int s_free_blocks_count;
     int s_free_inodes_count;
-    time_t s_mtime;
-    time_t s_umtime;
+    char s_mtime[20];
+    char s_umtime[20];
     int s_mnt_count ;
     int s_magic;
     int s_inode_size;

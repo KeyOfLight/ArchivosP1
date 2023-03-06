@@ -11,6 +11,7 @@
 #include "../Rmdisk.cpp"
 #include "../Fdisk.cpp"
 #include "../Mount.cpp"
+#include "../Mkfs.cpp"
 
 using namespace std;
 
@@ -28,6 +29,7 @@ public:
     Rmdisk remover;
     Fdisk Part;
     Mount Montador;
+    Mkfs MakeFileS;
 
     vector<Mounter> mounted;
 };
@@ -40,6 +42,7 @@ struct TiposDeComandos  //Listado de comandos que se utilizan en el proyecto
     string Remove = "RMDisk";
     string fdisk = "FDisk";
     string Mount = "Mount";
+    string Mkfs = "Mkfs";
 };
 
 
@@ -200,6 +203,28 @@ void Ann::ReconocerComando(string comando, vector<string> parametros){
             }
         }
         mounted = (Montador.Unmount(cmd.param.nombre, mounted));    ///////////////////Ejecutar Montar
+
+    }else if(ComandoSeparado == "mkfs"){//////////////////////// Unmount
+        cmd.nombre = ComandosNombre.Mount;
+        for (int i = 0; i < parametros.size(); i++){
+            param = parametros.at(i);
+            if(param.find(">id") == 0){
+                param = replace_txt(param, ">id=", "");
+                param = replace_txt(param, "\"", "");
+                cmd.param.nombre = param;
+            }
+            if(param.find(">type") == 0){
+                param = replace_txt(param, ">type=", "");
+                param = replace_txt(param, "\"", "");
+                cmd.param.type = param;
+            }
+            if(param.find(">fs") == 0){
+                param = replace_txt(param, ">fs=", "");
+                param = replace_txt(param, "\"", "");
+                cmd.param.fs = param;
+            }
+        }
+        MakeFileS.StartMkfs(mounted, cmd.param);    ///////////////////Ejecutar Montar
 
     }else if(ComandoSeparado == "rep"){/////////////////////////////////// Rep
         cmd.nombre = ComandosNombre.rep;
