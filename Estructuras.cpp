@@ -23,6 +23,8 @@ struct Parametros //Parametros de todos los comandos que se van a utilizar
     string del;
     string add;
     string fs;
+    string user;
+    string pass;
 
 };
 
@@ -127,6 +129,27 @@ struct BloqueArchivos{
 
 struct BloqueApuntadores{
     int b_pointers[16];
+};
+
+struct Grupo {
+    int GID;
+    int Type;
+    char Grupo[10];
+};
+
+struct User {
+    int UID;
+    int Type;
+    char Grupo[10];
+    char Pass[10];
+    char Uss[10];
+};
+
+
+struct credentials{
+    string pass;
+    string usser;
+    bool logueado = false;
 };
 
 class Comando //Clase que tiene toda la informacion para guardar un comando

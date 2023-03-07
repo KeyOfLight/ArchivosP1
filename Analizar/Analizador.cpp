@@ -12,6 +12,7 @@
 #include "../Fdisk.cpp"
 #include "../Mount.cpp"
 #include "../Mkfs.cpp"
+#include "../Login.cpp"
 
 using namespace std;
 
@@ -30,8 +31,10 @@ public:
     Fdisk Part;
     Mount Montador;
     Mkfs MakeFileS;
+    Login lgn;
 
     vector<Mounter> mounted;
+    credentials Logued;
 };
 
 struct TiposDeComandos  //Listado de comandos que se utilizan en el proyecto
@@ -204,8 +207,8 @@ void Ann::ReconocerComando(string comando, vector<string> parametros){
         }
         mounted = (Montador.Unmount(cmd.param.nombre, mounted));    ///////////////////Ejecutar Montar
 
-    }else if(ComandoSeparado == "mkfs"){//////////////////////// Unmount
-        cmd.nombre = ComandosNombre.Mount;
+    }else if(ComandoSeparado == "mkfs"){//////////////////////// Mkfs
+        cmd.nombre = ComandosNombre.Mkfs;
         for (int i = 0; i < parametros.size(); i++){
             param = parametros.at(i);
             if(param.find(">id") == 0){
@@ -224,7 +227,29 @@ void Ann::ReconocerComando(string comando, vector<string> parametros){
                 cmd.param.fs = param;
             }
         }
-        MakeFileS.StartMkfs(mounted, cmd.param);    ///////////////////Ejecutar Montar
+        MakeFileS.StartMkfs(mounted, cmd.param);    ///////////////////Ejecutar Make file system
+
+    }else if(ComandoSeparado == "login"){//////////////////////// Unmount
+        cmd.nombre = ComandosNombre.Mount;
+        for (int i = 0; i < parametros.size(); i++){
+            param = parametros.at(i);
+            if(param.find(">id") == 0){
+                param = replace_txt(param, ">id=", "");
+                param = replace_txt(param, "\"", "");
+                cmd.param.nombre = param;
+            }
+            if(param.find(">user") == 0){
+                param = replace_txt(param, ">user=", "");
+                param = replace_txt(param, "\"", "");
+                cmd.param.user = param;
+            }
+            if(param.find(">pass") == 0){
+                param = replace_txt(param, ">pass=", "");
+                param = replace_txt(param, "\"", "");
+                cmd.param.pass = param;
+            }
+        }
+        Logued = lgn.Loguear(mounted, cmd.param);    ///////////////////Ejecutar Login
 
     }else if(ComandoSeparado == "rep"){/////////////////////////////////// Rep
         cmd.nombre = ComandosNombre.rep;

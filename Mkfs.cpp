@@ -24,6 +24,7 @@ void Mkfs::StartMkfs(vector<Mounter> Montados, Parametros parameters){
                 return;
             }
             CreateExt2(Montados[i]);
+            return;
         }
     }
 };
@@ -106,8 +107,7 @@ void Mkfs::CreateExt2(Mounter Particion){
     char inodos[int(n)];
     char bloques[3 * int(n)];
 
-    for (int i = 0; i < n; i++)
-    {
+    for (int i = 0; i < n; i++){
         inodos[i] = '0';
     }
 
@@ -116,8 +116,7 @@ void Mkfs::CreateExt2(Mounter Particion){
     fseek(dsk, PosSupB + sizeof(Sblock), SEEK_SET);
     fwrite(&inodos, sizeof(inodos), 1, dsk);
 
-    for (int i = 0; i < 3 * n; i++)
-    {
+    for (int i = 0; i < 3 * n; i++){
         bloques[i] = '0';
     }
     bloques[0] = '1';
@@ -137,8 +136,7 @@ void Mkfs::CreateExt2(Mounter Particion){
     inodoRoot.i_type = '0';
     inodoRoot.i_block[0] = 0;
 
-    for (int i = 1; i < 15; i++)
-    {
+    for (int i = 1; i < 15; i++){
         inodoRoot.i_block[i] = -1;
     }
 
@@ -168,8 +166,7 @@ void Mkfs::CreateExt2(Mounter Particion){
     inodoArchivo.i_perm = 664;
     inodoArchivo.i_type = '1';
     inodoArchivo.i_block[0] = 1;
-    for (int i = 1; i < 15; i++)
-    {
+    for (int i = 1; i < 15; i++){
         inodoArchivo.i_block[i] = -1;
     }
 
@@ -325,8 +322,7 @@ void Mkfs::CreateExt3(Mounter Particion){
     char inodos[int(n)];
     char bloques[3 * int(n)];
 
-    for (int i = 0; i < n; i++)
-    {
+    for (int i = 0; i < n; i++){
         inodos[i] = '0';
     }
 
@@ -335,8 +331,7 @@ void Mkfs::CreateExt3(Mounter Particion){
     fseek(dsk, SupBlock.s_bm_inode_start, SEEK_SET);
     fwrite(&inodos, sizeof(inodos), 1, dsk);
 
-     for (int i = 0; i < 3 * n; i++)
-    {
+     for (int i = 0; i < 3 * n; i++){
         bloques[i] = '0';
     }
 
@@ -386,8 +381,7 @@ void Mkfs::CreateExt3(Mounter Particion){
     inodoArchivo.i_perm = 664;
     inodoArchivo.i_type = '1';
     inodoArchivo.i_block[0] = 1;
-    for (int i = 1; i < 15; i++)
-    {
+    for (int i = 1; i < 15; i++){
         inodoArchivo.i_block[i] = -1;
     }
 
