@@ -34,7 +34,8 @@ public:
     Login lgn;
 
     vector<Mounter> mounted;
-    credentials Logued;
+    User Logued;
+    User empt;
 };
 
 struct TiposDeComandos  //Listado de comandos que se utilizan en el proyecto
@@ -229,7 +230,7 @@ void Ann::ReconocerComando(string comando, vector<string> parametros){
         }
         MakeFileS.StartMkfs(mounted, cmd.param);    ///////////////////Ejecutar Make file system
 
-    }else if(ComandoSeparado == "login"){//////////////////////// Unmount
+    }else if(ComandoSeparado == "login"){//////////////////////// Login
         cmd.nombre = ComandosNombre.Mount;
         for (int i = 0; i < parametros.size(); i++){
             param = parametros.at(i);
@@ -250,6 +251,14 @@ void Ann::ReconocerComando(string comando, vector<string> parametros){
             }
         }
         Logued = lgn.Loguear(mounted, cmd.param);    ///////////////////Ejecutar Login
+
+    }else if(ComandoSeparado == "logout"){//////////////////////// Logout
+        
+        if(Logued.startpoint != 0){
+            Logued = empt;
+        }else{
+            cout<< "No se puede desloguear debido a que no esta logueado en ninguna sesion"<< endl;
+        }
 
     }else if(ComandoSeparado == "rep"){/////////////////////////////////// Rep
         cmd.nombre = ComandosNombre.rep;

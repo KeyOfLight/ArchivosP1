@@ -13,22 +13,23 @@ using namespace std;
 class Login {
     public:
 
-    credentials Loguear(vector<Mounter> Montados, Parametros parameters);
+    User Loguear(vector<Mounter> Montados, Parametros parameters);
     vector<string> Separar(string Cadena);
-    credentials ReturnUsser(vector<string> Datos);
+    User ReturnUsser(vector<string> Datos);
     string replace_txt(string str, const string& from, const string& to);
 };
 
 
 
-credentials Login::Loguear(vector<Mounter> Montados, Parametros parameters){
+User Login::Loguear(vector<Mounter> Montados, Parametros parameters){
 
     bool PMontada = false;
     string path;
     int startpoint = 0;
-    char pass[64];
-    char uss[64];
-    credentials UsuarioInf;
+    char pass[11];
+    char uss[11];
+    User UsuarioInf;
+    User empt;
 
     for (int i = 0; i < Montados.size(); i++){
         if(parameters.nombre == Montados[i].id){
@@ -41,7 +42,7 @@ credentials Login::Loguear(vector<Mounter> Montados, Parametros parameters){
 
     if(!PMontada){
         cout<< "No se encontro la particion deseada"<< endl;
-        return UsuarioInf;
+        return empt;
     }
 
     FILE* dsk = fopen(path.c_str(), "rb+");
@@ -63,17 +64,21 @@ credentials Login::Loguear(vector<Mounter> Montados, Parametros parameters){
     strcpy(pass, parameters.pass.c_str());
     strcpy(uss, parameters.user.c_str());
 
-    if(UsuarioInf.usser != uss){
+    int value;
+    value = strcmp(UsuarioInf.Uss,uss);  
+
+    if(value != 0){
         cout<< "El usuario no pudo ser encontrado"<<endl;
-        return UsuarioInf;
+        return empt;
     }
-
-    if(UsuarioInf.pass != pass){
+    value = strcmp(UsuarioInf.Pass,pass); 
+    if(value != 0){
         cout<< "No se pudo acceder a la cuenta deseada"<< endl;
-        return UsuarioInf;
+        return empt;
     }
 
-    UsuarioInf.logueado = true;
+    UsuarioInf.path = path;
+    UsuarioInf.startpoint = startpoint;
 
     return UsuarioInf;
 
@@ -91,9 +96,9 @@ vector<string> Login::Separar(string Cadena){
     return splited;
 }
 
-credentials Login::ReturnUsser(vector<string> Datos){
+User Login::ReturnUsser(vector<string> Datos){
 
-    credentials cosas;
+    User cosas;
     vector<string> splited;
     string segment;
     string actuall;
@@ -101,14 +106,18 @@ credentials Login::ReturnUsser(vector<string> Datos){
     for (int i = 0; i < Datos.size(); i++)
     {
         if(Datos[i].find("1,U,") == 0){
-            actuall = replace_txt(Datos[i], "1,U,", "");
+            actuall = replace_txt(Datos[i], "1,U,", "1,U,");
             stringstream text_to_split(actuall);
             
             while(getline(text_to_split, segment,',')){
             splited.push_back(segment);
             }
-            cosas.pass = splited[2];
-            cosas.usser = splited[1];
+            strcpy(&cosas.UID, splited[0].c_str());
+            strcpy(&cosas.Type, splited[1].c_str());
+            strcpy(cosas.Grupo, splited[2].c_str());
+            strcpy(cosas.Uss, splited[3].c_str());
+            strcpy(cosas.Pass, splited[4].c_str());
+            
             return cosas;
         }
     }
