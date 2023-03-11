@@ -529,7 +529,6 @@ string Compartido::ReadInodo(int pos, FILE* dsk, vector<string> coincidencia, Sb
 
 };
 
-
 string Compartido::ReadBlckCarpetas(int pos, FILE* dsk, vector<string> coincidencia, Sblock SupBlock){
 
     BloqueCarpetas bloqueCarpeta;
@@ -558,7 +557,6 @@ string Compartido::ReadBlckCarpetas(int pos, FILE* dsk, vector<string> coinciden
     }
     return Datos;
 };
-
 
 string Compartido::ReadFileBlocks(I_node InodoArchivo, int BlockStartPoint, FILE* dsk, int InodoStart){
 
@@ -617,8 +615,6 @@ string Compartido::ReadFileBlocks(I_node InodoArchivo, int BlockStartPoint, FILE
 
     return ContenidoStr;
 };
-
-
 
 string Compartido::ReadPointer(BloqueApuntadores Apuntador, FILE* dsk, int BlockStartPoint){
     int contador;

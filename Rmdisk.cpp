@@ -30,32 +30,30 @@ int Rmdisk::Remove(string Dir){ //Se encarga de eliminar el disco proporcionado 
         return 0;
     }
 
-    int opcion;
+    string opcion;
     bool Confirmar = false;
 
-    do {
+    while (!Confirmar) {
         cout << "Esta seguro que desea borrar el disco " + Path + "?" << endl;
         cout << "1) Si"<<endl;
         cout << "2) No"<< endl;
 
         cin >> opcion;
 
-        switch (opcion){
-        case 1:
+        if(opcion == "1"){
             Confirmar = true;
             cout << "Se confirmo que se desea eliminar el disco " + Path + ", se procedera a elminarlo" << endl;
             break;
-
-        case 2:
+        }else if(opcion == "2"){
             Confirmar = true;
             cout << "Se cancelara la eliminacion del disco"<< endl;
             return 0;
-        
-        default:
-            cout << "Ingrese una opcion valdia"<<endl;
-            cin >> opcion;
+        }else {
+            cout<<"Ingrese una opcion valdia"<<endl;
         }
-    } while (!Confirmar);
+            
+        
+    }
     
 
     string comando1 = "sudo rm \"" + Path + "\"";

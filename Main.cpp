@@ -16,9 +16,9 @@ vector<Mounter> mounted;
 
 int main(){
 
-    int opcion;
+    string opcion;
 
-    while (opcion != 0){
+    while (opcion != "0"){
         cout << "***********MENU GENERAL**********" << endl
         << "*****Diego Andre Gomez 201908327*****" << endl
         << "1) Ingresar comando*" << endl
@@ -27,13 +27,11 @@ int main(){
 
         cin >> opcion;
 
-        switch (opcion)
-        {
-        case 1:
+        if(opcion == "1"){
             ingresarcomando();
             break;
-        }
 
+        }
     } 
     
 }
