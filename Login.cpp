@@ -49,7 +49,6 @@ User Login::Loguear(vector<Mounter> Montados, Parametros parameters){
     fseek(dsk, startpoint, SEEK_SET);
 
     Sblock super_block;
-
     fread(&super_block, sizeof(Sblock), 1, dsk);
 
     BloqueArchivos bl_archivos;

@@ -13,6 +13,7 @@
 #include "../Mount.cpp"
 #include "../Mkfs.cpp"
 #include "../Login.cpp"
+#include "../Mkgrp.cpp"
 
 using namespace std;
 
@@ -32,6 +33,7 @@ public:
     Mount Montador;
     Mkfs MakeFileS;
     Login lgn;
+    Mkgrp Makegrp;
 
     vector<Mounter> mounted;
     User Logued;
@@ -259,6 +261,19 @@ void Ann::ReconocerComando(string comando, vector<string> parametros){
         }else{
             cout<< "No se puede desloguear debido a que no esta logueado en ninguna sesion"<< endl;
         }
+
+    }else if(ComandoSeparado == "mkgrp"){//////////////////////// Mkgrp
+        
+        cmd.nombre = ComandosNombre.Mkfs;
+        for (int i = 0; i < parametros.size(); i++){
+            param = parametros.at(i);
+            if(param.find(">name") == 0){
+                param = replace_txt(param, ">name=", "");
+                param = replace_txt(param, "\"", "");
+                cmd.param.nombre = param;
+            }
+        }
+        Makegrp.CreateGrp(Logued,cmd.param);
 
     }else if(ComandoSeparado == "rep"){/////////////////////////////////// Rep
         cmd.nombre = ComandosNombre.rep;

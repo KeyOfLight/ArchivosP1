@@ -132,8 +132,8 @@ struct BloqueApuntadores{
 };
 
 struct Grupo {
-    int GID;
-    int Type;
+    char GID;
+    char Type;
     char Grupo[11];
 };
 

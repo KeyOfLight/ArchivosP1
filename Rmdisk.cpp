@@ -40,8 +40,7 @@ int Rmdisk::Remove(string Dir){ //Se encarga de eliminar el disco proporcionado 
 
         cin >> opcion;
 
-        switch (opcion)
-        {
+        switch (opcion){
         case 1:
             Confirmar = true;
             cout << "Se confirmo que se desea eliminar el disco " + Path + ", se procedera a elminarlo" << endl;
@@ -54,6 +53,7 @@ int Rmdisk::Remove(string Dir){ //Se encarga de eliminar el disco proporcionado 
         
         default:
             cout << "Ingrese una opcion valdia"<<endl;
+            cin >> opcion;
         }
     } while (!Confirmar);
     
