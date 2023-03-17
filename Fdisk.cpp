@@ -327,6 +327,13 @@ void Fdisk::CrearParticion(Parametros parameters)
             return;
         }
 
+        int libre = (TempExt.size - CalcularSizeExt(TempExt.start, parameters, 0)) - newsize;
+        if(libre < 0){
+            cout << "El espacio restante en el disco no es suficiente para almacenar esta particion logica"<< endl;
+            return;
+        }
+
+
         
         if(currentFit == 0){//Best Fit
             EmptEbr = GetPositionFFEbr(TempExt, newsize, parameters);
@@ -338,22 +345,15 @@ void Fdisk::CrearParticion(Parametros parameters)
             parameters.fit = "f";
 
         }else if(currentFit == 2){//Worst Fit
-
+            
         }
-
-        int libre = (TempExt.size - CalcularSizeExt(TempExt.start, parameters, 0)) - newsize;
-        if(libre < 0){
-            cout << "El espacio restante en el disco no es suficiente para almacenar esta particion logica"<< endl;
-            return;
-        }
-
         for (int i = 0; i < 4; i++){
             char newtype = 'e';
             char typepart = mbr.particiones[i].type;
             if (newtype == typepart){
                 EmptEbr = ActivarEBR(parameters, newsize, EmptEbr.start, EmptEbr.p_siguiente);
                 rewind(dsk);
-                fseek(dsk, startpoint, SEEK_SET);
+                fseek(dsk, EmptEbr.start, SEEK_SET);
                 fwrite(&EmptEbr, sizeof(EBR), 1, dsk);
                 break;
             }
@@ -587,20 +587,18 @@ EBR Fdisk::GetPositionFFEbr(Particion PartExt, int Tam,Parametros parameters){//
         return WithPos;
     }
 
-    EBR lista[Posmbr];
+    EBR AllArrays[Posmbr];
     Posmbr = 0;
     fseek(dsk, startpoint, SEEK_SET);
     fread(&tempebr, sizeof(tempebr), 1, dsk);
 
     while (tempebr.status == '1'){
-        lista[Posmbr] = tempebr;
+        AllArrays[Posmbr] = tempebr;
         Posmbr =+ 1;
         fseek(dsk, tempebr.p_siguiente, SEEK_SET);
         fread(&tempebr, sizeof(tempebr), 1, dsk);
     }
 
-    EBR AllArrays[Posmbr];
-    memcpy(AllArrays, lista, sizeof(EBR));
     int n = Posmbr;
     int i,j;
     EBR temp[n];
@@ -638,11 +636,25 @@ EBR Fdisk::GetPositionFFEbr(Particion PartExt, int Tam,Parametros parameters){//
             }
         }
     }
-    AllArrays[0].p_siguiente = AllArrays[0].start + AllArrays[0].size;
-    fseek(dsk, AllArrays[0].start, SEEK_SET);
-    fwrite(&AllArrays[0], sizeof(EBR), 1, dsk);
+    int nextpos;
+    nextpos = AllArrays[0].start + AllArrays[0].size;
+    AllArrays[0].p_siguiente = nextpos;
+    EBR Pasado;
 
-    WithPos.start = AllArrays[0].start + AllArrays[0].size;
+    Pasado.fit = AllArrays[0].fit;
+    strcpy(Pasado.name, AllArrays[0].name);
+    Pasado.p_siguiente = AllArrays[0].p_siguiente;
+    Pasado.size = AllArrays[0].size;
+    Pasado.start = AllArrays[0].start;
+    Pasado.status = AllArrays[0].status;
+   
+    fseek(dsk, PartExt.start, SEEK_SET);
+    fwrite(&Pasado, sizeof(EBR), 1, dsk);
+    EBR empt22;
+    fseek(dsk, PartExt.start, SEEK_SET);
+    fread(&empt22, sizeof(EBR), 1, dsk);
+
+    WithPos.start = nextpos;
     WithPos.p_siguiente = -1;
     return WithPos;
 }

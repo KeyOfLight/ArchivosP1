@@ -25,6 +25,7 @@ struct Parametros //Parametros de todos los comandos que se van a utilizar
     string fs;
     string user;
     string pass;
+    string Id;
 
 };
 

@@ -287,9 +287,17 @@ void Ann::ReconocerComando(string comando, vector<string> parametros){
                     param = replace_txt(param, ">path=", "");
                     param = replace_txt(param, "\"", "");
                     cmd.param.direccion = param;
+            }else if(param.find(">id") == 0){
+                    param = replace_txt(param, ">id=", "");
+                    param = replace_txt(param, "\"", "");
+                    cmd.param.Id = param;
+            }else if(param.find(">ruta") == 0){
+                    param = replace_txt(param, ">ruta=", "");
+                    param = replace_txt(param, "\"", "");
+                    cmd.param.pass = param;
             }
         }
-        report.GenerarReporte(cmd.param.direccion); //Ejecuta Generar Reporte
+        report.GenerarReporte(cmd.param); //Ejecuta Generar Reporte
 
     }
 
