@@ -24,7 +24,7 @@ Mounter Mount::Montar(string path, string nombre){
     MBR mbrActual;
     Mounter Montado;
     rewind(dsk);
-    fread(&mbrActual, sizeof(mbrActual), 1, dsk);
+    fread(&mbrActual, sizeof(MBR), 1, dsk);
     string s_a;
     int extstart = 0;
 
@@ -64,7 +64,7 @@ Mounter Mount::MontarEBR(string dir, string nombre, int startpoint, int ite){
     Mounter Montado;
     fseek(dsk, startpoint, SEEK_SET);
     string s_a;
-    fread(&tempebr, sizeof(tempebr), 1, dsk);
+    fread(&tempebr, sizeof(EBR), 1, dsk);
     int tam = nombre.length();
     s_a = compart.convertToString(tempebr.name, tam);
 

@@ -82,7 +82,7 @@ void Mkfs::CreateExt2(Mounter Particion){
         SupBlock.s_inode_start = startpoint + int(sizeof(Sblock)) + Estructs_Num + num_block + sizeof(EBR);
 
         for (int i = 0; i < Particion.size - sizeof(EBR); i++){
-            fwrite(&nulo, sizeof(nulo), 1, dsk);
+            fwrite(&nulo, sizeof(char), 1, dsk);
             fseek(dsk, PosSupB + i, SEEK_SET);
         }
 
@@ -94,7 +94,7 @@ void Mkfs::CreateExt2(Mounter Particion){
         SupBlock.s_inode_start = startpoint + int(sizeof(Sblock)) + Estructs_Num + num_block;
 
         for (int i = 0; i < Particion.size; i++){
-            fwrite(&nulo, sizeof(nulo), 1, dsk);
+            fwrite(&nulo, sizeof(char), 1, dsk);
             fseek(dsk, PosSupB + i, SEEK_SET);
         }
         fseek(dsk, startpoint, SEEK_SET);
@@ -252,7 +252,7 @@ void Mkfs::CreateExt3(Mounter Particion){
         SupBlock.s_inode_start = startpoint + int(sizeof(Sblock)) + Estructs_Num + num_block+ sizeof(EBR);
 
         for (int i = 0; i < Particion.size - sizeof(EBR); i++){
-            fwrite(&nulo, sizeof(nulo), 1, dsk);
+            fwrite(&nulo, sizeof(char), 1, dsk);
             fseek(dsk, PosSupB + i, SEEK_SET);
         }
 
@@ -265,7 +265,7 @@ void Mkfs::CreateExt3(Mounter Particion){
         SupBlock.s_inode_start = startpoint + int(sizeof(Sblock)) + Estructs_Num + num_block;
 
         for (int i = 0; i < Particion.size; i++){
-            fwrite(&nulo, sizeof(nulo), 1, dsk);
+            fwrite(&nulo, sizeof(char), 1, dsk);
             fseek(dsk, PosSupB + i, SEEK_SET);
         }
 

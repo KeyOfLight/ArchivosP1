@@ -1,0 +1,15 @@
+digraph DSK{
+ node [shape=plaintext];
+ struct3 [label=<
+<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="1" CELLPADDING="4">
+<TR>
+<TD BGCOLOR="purple" ROWSPAN="2">MBR</TD>
+<TD ROWSPAN="2">Primaria <BR/>3%</TD>
+<TD COLSPAN="6">Extendida</TD>
+<TD ROWSPAN="2">Primaria <BR/>3%</TD>
+<TD ROWSPAN="2">Libre <BR/>72%</TD>
+</TR>
+<TR>
+<TD BGCOLOR="lightblue" >EBR</TD><TD>Logica <BR/> 2 % </TD><TD BGCOLOR="lightblue" >EBR</TD><TD>Logica <BR/> 2 % </TD><TD BGCOLOR="lightblue" >EBR</TD><TD>Libre  <BR/> 14 % </TD></TR>
+</TABLE>>];
+}

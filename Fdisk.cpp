@@ -59,7 +59,7 @@ void Fdisk::EliminarParticion(Parametros parameters){
     MBR mbrActual;
     FILE* dsk = fopen(path.c_str(), "rb+");
     rewind(dsk);
-    fread(&mbrActual, sizeof(mbrActual), 1, dsk);
+    fread(&mbrActual, sizeof(MBR), 1, dsk);
     int extstart = 0;
 
     bool Discovacio = IstheDiskEmpty(mbrActual);
@@ -116,7 +116,7 @@ void Fdisk::EliminarPartL(int startpoint, bool Completo, string name, string dir
     fseek(dsk, startpoint, SEEK_SET);
     string s_a;
 
-    fread(&tempebr, sizeof(tempebr), 1, dsk);
+    fread(&tempebr, sizeof(EBR), 1, dsk);
 
     if(Completo){
         if(tempebr.status == '1'){  
@@ -206,7 +206,7 @@ void Fdisk::CrearParticion(Parametros parameters)
 
     if (dsk != NULL) {
         rewind(dsk);
-        fread(&mbr, sizeof(mbr), 1, dsk);
+        fread(&mbr, sizeof(MBR), 1, dsk);
     } else {
         cout << endl << " *** Error el path del disco no existe *** " << endl << endl ;
     }
@@ -373,11 +373,11 @@ int Fdisk::CalcularSizeExt(int start,Parametros parameters, int ocupado){
     fseek(dsk, startpoint, SEEK_SET);
 
 
-    fread(&tempebr, sizeof(tempebr), 1, dsk);
+    fread(&tempebr, sizeof(EBR), 1, dsk);
 
     if(tempebr.status == '1'){  
-        Occupied =+ tempebr.size;
-        CalcularSizeExt(tempebr.p_siguiente, parameters, Occupied);
+        Occupied += tempebr.size;
+        return CalcularSizeExt(tempebr.p_siguiente, parameters, Occupied);
     }
 
     return Occupied;
@@ -573,12 +573,12 @@ EBR Fdisk::GetPositionFFEbr(Particion PartExt, int Tam,Parametros parameters){//
     }
 
     fseek(dsk, startpoint, SEEK_SET);
-    fread(&tempebr, sizeof(tempebr), 1, dsk);
+    fread(&tempebr, sizeof(EBR), 1, dsk);
 
     while ((tempebr.status == '1')){
        Posmbr += 1;
        fseek(dsk, tempebr.p_siguiente, SEEK_SET);
-       fread(&tempebr, sizeof(tempebr), 1, dsk);
+       fread(&tempebr, sizeof(EBR), 1, dsk);
     }
 
     if(Posmbr == 0){
@@ -590,13 +590,13 @@ EBR Fdisk::GetPositionFFEbr(Particion PartExt, int Tam,Parametros parameters){//
     EBR AllArrays[Posmbr];
     Posmbr = 0;
     fseek(dsk, startpoint, SEEK_SET);
-    fread(&tempebr, sizeof(tempebr), 1, dsk);
+    fread(&tempebr, sizeof(EBR), 1, dsk);
 
     while (tempebr.status == '1'){
         AllArrays[Posmbr] = tempebr;
-        Posmbr =+ 1;
+        Posmbr += 1;
         fseek(dsk, tempebr.p_siguiente, SEEK_SET);
-        fread(&tempebr, sizeof(tempebr), 1, dsk);
+        fread(&tempebr, sizeof(EBR), 1, dsk);
     }
 
     int n = Posmbr;
@@ -667,13 +667,13 @@ int Fdisk::SearchNameEBR(Particion PartExt, string Nombre, Parametros parameters
     int startpoint = PartExt.start;
 
     fseek(dsk, startpoint, SEEK_SET);
-    fread(&tempebr, sizeof(tempebr), 1, dsk);
+    fread(&tempebr, sizeof(EBR), 1, dsk);
 
     while ((tempebr.status == '1')){
         if(tempebr.name == Nombre)
             return 1;
        fseek(dsk, tempebr.p_siguiente, SEEK_SET);
-       fread(&tempebr, sizeof(tempebr), 1, dsk);
+       fread(&tempebr, sizeof(EBR), 1, dsk);
     }
 
     return 0;
@@ -701,12 +701,12 @@ EBR Fdisk::GetPositionBFEbr(Particion PartExt, int Tam,Parametros parameters){//
         return WithPos;
     }
     fseek(dsk, startpoint, SEEK_SET);
-    fread(&tempebr, sizeof(tempebr), 1, dsk);
+    fread(&tempebr, sizeof(EBR), 1, dsk);
 
     while ((tempebr.status == '1')){
        Posmbr += 1;
        fseek(dsk, tempebr.p_siguiente, SEEK_SET);
-       fread(&tempebr, sizeof(tempebr), 1, dsk);
+       fread(&tempebr, sizeof(EBR), 1, dsk);
     }
 
     if(Posmbr == 0){
@@ -718,13 +718,13 @@ EBR Fdisk::GetPositionBFEbr(Particion PartExt, int Tam,Parametros parameters){//
     EBR lista[Posmbr];
     Posmbr = 0;
     fseek(dsk, startpoint, SEEK_SET);
-    fread(&tempebr, sizeof(tempebr), 1, dsk);
+    fread(&tempebr, sizeof(EBR), 1, dsk);
 
     while (tempebr.status == '1'){
         lista[Posmbr] = tempebr;
-        Posmbr =+ 1;
+        Posmbr += 1;
         fseek(dsk, tempebr.p_siguiente, SEEK_SET);
-        fread(&tempebr, sizeof(tempebr), 1, dsk);
+        fread(&tempebr, sizeof(EBR), 1, dsk);
     }
 
     EBR AllArrays[Posmbr];
@@ -793,7 +793,7 @@ void Fdisk::AddSpace(Parametros parameters){
     MBR AllArrays;
     FILE* dsk = fopen(path.c_str(), "rb+");
     rewind(dsk);
-    fread(&mbrActual, sizeof(mbrActual), 1, dsk);
+    fread(&mbrActual, sizeof(MBR), 1, dsk);
     int extstart = 0;
     bool Discovacio = IstheDiskEmpty(mbrActual);
 
@@ -862,7 +862,7 @@ void Fdisk::AddLogic(int startpoint, int Maxsize, string name, string dir, int a
     EBR tempebr;
     fseek(dsk, startpoint, SEEK_SET);
     string s_a;
-    fread(&tempebr, sizeof(tempebr), 1, dsk);
+    fread(&tempebr, sizeof(EBR), 1, dsk);
     int tam = name.length();
     s_a = compart.convertToString(tempebr.name, tam);
 
