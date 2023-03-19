@@ -95,7 +95,7 @@ bool Compartido::WriteFileBlock(FILE* dsk, int startpoint, string pathMkfs, stri
     //Separar Path por /
     PathSeparado = split_Path(pathMkfs);
 
-    for (int i = 0; i < 15; i++){
+    for (int i = 0; i < 15; i++){//WIP Apuntadores indirectos
         if(InodoRoot.i_block[i] != -1){
             pos = InodoRoot.i_block[i];
             if(WrteBlckCarpetas(pos,dsk,PathSeparado, super_block, Escribir)){
@@ -498,7 +498,7 @@ string Compartido::LeerArchivoMkfs(FILE* dsk, int startpoint, string pathMkfs){
     //Separar Path por /
     PathSeparado = split_Path(pathMkfs);
 
-    for (int i = 0; i < 15; i++){
+    for (int i = 0; i < 15; i++){//WIP Apuntadores indirectos
         if(InodoRoot.i_block[i] != -1){
             pos = InodoRoot.i_block[i];
             DatosArch += ReadBlckCarpetas(pos,dsk,PathSeparado, super_block);

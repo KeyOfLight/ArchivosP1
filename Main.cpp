@@ -43,7 +43,7 @@ int main(){
 
 void ingresarcomando(){
 
-    string useramne; //Comando que se desea ejecutar
+    string useramne; //Comando que se desea ejecutar-- Me acabo de dar cuenta que no tome en cuenta los apuntadores indirecto ni doble indirectos al momento de moverme en las carpetas para buscar archivos WIP
     cout << "Escriba el comando que desea ejecutar" << endl;
 
     cin.ignore(numeric_limits<int>::max(),'\n');

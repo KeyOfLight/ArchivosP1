@@ -297,7 +297,7 @@ void Ann::ReconocerComando(string comando, vector<string> parametros){
                     cmd.param.pass = param;
             }
         }
-        report.GenerarReporte(cmd.param); //Ejecuta Generar Reporte
+        report.GenerarReporte(cmd.param, Logued); //Ejecuta Generar Reporte
 
     }
 

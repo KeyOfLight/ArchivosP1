@@ -1,0 +1,64 @@
+digraph DSK{
+ node [shape=plaintext];
+rankdir=LR;
+ InodoRoot [label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="1" CELLPADDING="4">
+<TR>
+<TD BGCOLOR="purple" COLSPAN="2">Inodo Root</TD></TR>
+<TR>
+<TD BGCOLOR="lightblue">i_uid</TD><TD> 1 </TD>
+</TR>
+<TR>
+<TD BGCOLOR="lightblue">i_gid</TD><TD> 1 </TD>
+</TR>
+<TR>
+<TD BGCOLOR="lightblue">i_size</TD><TD> 0 </TD>
+</TR>
+<TR>
+<TD BGCOLOR="lightblue">i_atime</TD><TD> 18/03/2023 20:17:35 </TD>
+</TR>
+<TR>
+<TD BGCOLOR="lightblue">i_ctime</TD><TD> 18/03/2023 20:17:35 </TD>
+</TR>
+<TR>
+<TD BGCOLOR="lightblue">i_mtime</TD><TD> 18/03/2023 20:17:35 </TD>
+</TR>
+<TR>
+<TD BGCOLOR="lightblue">i_type</TD><TD> 0 </TD>
+</TR>
+<TR>
+<TD BGCOLOR="lightblue">i_perm</TD><TD> 664 </TD>
+</TR>
+</TABLE>>];
+InodoRoot -> Inodo1
+Inodo1[label=<
+<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="1" CELLPADDING="4">
+<TR>
+<TD BGCOLOR="purple" COLSPAN="2">Inodo1</TD>
+</TR>
+<TR>
+<TD BGCOLOR="lightblue">i_uid</TD><TD>1 </TD>
+</TR>
+<TR>
+<TD BGCOLOR="lightblue">i_gid</TD><TD>1 </TD>
+</TR>
+<TR>
+<TD BGCOLOR="lightblue">i_size</TD><TD>32 </TD>
+</TR>
+<TR>
+<TD BGCOLOR="lightblue">i_atime</TD><TD>18/03/2023 20:17:35 </TD>
+</TR>
+<TR>
+<TD BGCOLOR="lightblue">i_ctime</TD><TD>18/03/2023 20:17:35 </TD>
+</TR>
+<TR>
+<TD BGCOLOR="lightblue">i_mtime</TD><TD>18/03/2023 20:17:35 </TD>
+</TR>
+<TR>
+<TD BGCOLOR="lightblue">i_type</TD><TD>1 </TD>
+</TR>
+<TR>
+<TD BGCOLOR="lightblue">i_perm</TD><TD>664 </TD>
+</TR>
+</TABLE>>];
+}
