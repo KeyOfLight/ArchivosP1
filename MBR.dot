@@ -1,4 +1,0 @@
-digraph MBR{
- rankdir=LR
- node [shape=Mrecord];
- struct1 [label=" {Reporte MBR | {Mbr Tam| Firma | Fecha de creacion}| {10485808 | 383 | 15/03/2023 20:36:18 }}| {Particion | {Status | Tipo | Fit | StatPoint | Size | Nombre}| {1 | p | f | 145 | 409600 | brotato1 }}| {Particion | {Status | Tipo | Fit | StatPoint | Size | Nombre}| {1 | e | f | 409745 | 2097152 | brotato2 }}| {Particion | {Status | Tipo | Fit | StatPoint | Size | Nombre}| {1 | p | f | 409745 | 409600 | brotato3 }}| {Particion | {Status | Tipo | Fit | StatPoint | Size | Nombre}| {0 |   |   | 0 | 0 |  }}| {Particion | {Status | Fit | StatPoint | Size | Nombre}| {1 | f | 409745 | 307200 | puta2 }}| {Particion | {Status | Fit | StatPoint | Size | Nombre}| {1 | f | 716945 | 307200 | puta3 }}"]}

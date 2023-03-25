@@ -15,8 +15,16 @@ class Reportes{
     int ContarEBRs(int start,Parametros parameters, int ocupado);
     string DiskEBR(int start,Parametros parameters, MBR mbr, int written, int total);
     void ReportInodeRoot(Parametros parameters, User Uss);
+    void BlockReportes(Parametros parameters, User Uss);
     string GraphBlocks(int pos, FILE* dsk, Sblock SupBlock, bool Inodo);
     string GraphInodo(int pos, FILE* dsk, Sblock SupBlock, bool Inodo);
+
+    string GraphFileBlocks(I_node InodoArchivo, int BlockStartPoint, FILE* dsk, int InodoStart);
+    string ReadPointer(BloqueApuntadores Apuntador, FILE* dsk, int BlockStartPoint);
+
+    void RerportBMInodos(Parametros parameters, User Uss);
+    void RerportBMBloques(Parametros parameters, User Uss);
+    void ReportSupBlock(Parametros parameters, User Uss);
 
 
     Comando cmd;
@@ -32,7 +40,152 @@ void Reportes::GenerarReporte(Parametros parameters, User Uss){
         ReportDisk(parameters);
     }else if(parameters.nombre == "inode"){
         ReportInodeRoot(parameters, Uss);
+    }else if(parameters.nombre == "block"){
+        BlockReportes(parameters, Uss);
+    }else if(parameters.nombre == "bm_inode"){
+        RerportBMInodos(parameters, Uss);
+    }else if(parameters.nombre == "bm_block"){
+        RerportBMBloques(parameters, Uss);
+    }else if(parameters.nombre == "sb"){
+        ReportSupBlock(parameters, Uss);
     }
+
+
+};
+
+void Reportes::ReportSupBlock(Parametros parameters, User Uss){
+    int pos;
+    string path = parameters.direccion;
+    int startpoint = Uss.startpoint;
+    string Diagrama = "digraph SBloques{\n node [shape=plaintext];\nrankdir=LR;\n ";
+    FILE* dsk = fopen(path.c_str(), "rb+");
+    fseek(dsk, startpoint, SEEK_SET);
+    //Leer Superblock
+    Sblock super_block;
+    fread(&super_block, sizeof(Sblock), 1, dsk);
+    
+    Diagrama += "SBlock[label=<\n<TABLE BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"1\" CELLPADDING=\"4\">\n";
+    Diagrama += "<TR>\n<TD BGCOLOR=\"purple\" COLSPAN=\"2\">Super Bloque</TD>\n</TR>\n";
+    Diagrama += "<TR>\n<TD BGCOLOR=\"lightblue\">s_filesystem_type</TD><TD>" + to_string(super_block.s_filesystem_type) + " </TD>\n</TR>\n";
+    Diagrama += "<TR>\n<TD BGCOLOR=\"lightblue\">s_inodes_count</TD><TD>" + to_string(super_block.s_inodes_count) + " </TD>\n</TR>\n";
+    Diagrama += "<TR>\n<TD BGCOLOR=\"lightblue\">s_blocks_count</TD><TD>" + to_string(super_block.s_blocks_count) + " </TD>\n</TR>\n";
+    Diagrama += "<TR>\n<TD BGCOLOR=\"lightblue\">s_free_blocks_count</TD><TD>" + to_string(super_block.s_free_blocks_count) + " </TD>\n</TR>\n";
+    Diagrama += "<TR>\n<TD BGCOLOR=\"lightblue\">s_free_inodes_count</TD><TD>" + to_string(super_block.s_free_inodes_count) + " </TD>\n</TR>\n";
+    Diagrama += "<TR>\n<TD BGCOLOR=\"lightblue\">s_mtime</TD><TD>" + string(super_block.s_mtime) + " </TD>\n</TR>\n";
+    Diagrama += "<TR>\n<TD BGCOLOR=\"lightblue\">s_umtime</TD><TD>" + string(super_block.s_umtime) + " </TD>\n</TR>\n";
+    Diagrama += "<TR>\n<TD BGCOLOR=\"lightblue\">s_mnt_count</TD><TD>" + to_string(super_block.s_mnt_count) + " </TD>\n</TR>\n";
+    Diagrama += "<TR>\n<TD BGCOLOR=\"lightblue\">s_magic</TD><TD>" + to_string(super_block.s_magic) + " </TD>\n</TR>\n";
+    Diagrama += "<TR>\n<TD BGCOLOR=\"lightblue\">s_inode_size</TD><TD>" + to_string(super_block.s_inode_size) + " </TD>\n</TR>\n";
+    Diagrama += "<TR>\n<TD BGCOLOR=\"lightblue\">s_block_size</TD><TD>" + to_string(super_block.s_block_size) + " </TD>\n</TR>\n";
+    Diagrama += "<TR>\n<TD BGCOLOR=\"lightblue\">s_firts_ino</TD><TD>" + to_string(super_block.s_firts_ino) + " </TD>\n</TR>\n";
+    Diagrama += "<TR>\n<TD BGCOLOR=\"lightblue\">s_first_blo</TD><TD>" + to_string(super_block.s_first_blo) + " </TD>\n</TR>\n";
+    Diagrama += "<TR>\n<TD BGCOLOR=\"lightblue\">s_bm_inode_start</TD><TD>" + to_string(super_block.s_bm_inode_start) + " </TD>\n</TR>\n";
+    Diagrama += "<TR>\n<TD BGCOLOR=\"lightblue\">s_bm_block_start</TD><TD>" + to_string(super_block.s_bm_block_start) + " </TD>\n</TR>\n";
+    Diagrama += "<TR>\n<TD BGCOLOR=\"lightblue\">s_inode_start</TD><TD>" + to_string(super_block.s_inode_start) + " </TD>\n</TR>\n";
+    Diagrama += "<TR>\n<TD BGCOLOR=\"lightblue\">s_block_start</TD><TD>" + to_string(super_block.s_block_start) + " </TD>\n</TR>\n";
+    Diagrama += "</TABLE>>];\n";
+
+    Diagrama += "}";
+
+    ofstream MyFile("SBlock.dot");
+    MyFile << Diagrama;
+    MyFile.close();
+
+    string com = "dot -Tpdf SBlock.dot -o SBlock.pdf";
+    const char *cmd = com.c_str();
+    system(cmd);
+
+};
+
+void Reportes::RerportBMBloques(Parametros parameters, User Uss){
+    int pos;
+    string path = parameters.direccion;
+    int startpoint = Uss.startpoint;
+    string Diagrama = "";
+    FILE* dsk = fopen(path.c_str(), "rb+");
+    fseek(dsk, startpoint, SEEK_SET);
+    //Leer Superblock
+    Sblock super_block;
+    fread(&super_block, sizeof(Sblock), 1, dsk);
+    char actual;
+
+    for (int i = super_block.s_bm_block_start; i < super_block.s_inode_start; i++){
+        fseek(dsk, i, SEEK_SET);
+        fread(&actual, sizeof(char), 1, dsk);
+        Diagrama += actual;
+        if(((i-super_block.s_bm_block_start)%20) == 0 && (i-super_block.s_bm_block_start) != 0){
+            Diagrama += "\n";
+        }
+    }
+
+    ofstream MyFile("BMBloques.txt");
+    MyFile << Diagrama;
+    MyFile.close();
+
+};
+
+void Reportes::RerportBMInodos(Parametros parameters, User Uss){
+    int pos;
+    string path = parameters.direccion;
+    int startpoint = Uss.startpoint;
+    string Diagrama = "";
+    FILE* dsk = fopen(path.c_str(), "rb+");
+    fseek(dsk, startpoint, SEEK_SET);
+    //Leer Superblock
+    Sblock super_block;
+    fread(&super_block, sizeof(Sblock), 1, dsk);
+    char actual;
+
+    for (int i = super_block.s_bm_inode_start; i < super_block.s_bm_block_start; i++){
+        fseek(dsk, i, SEEK_SET);
+        fread(&actual, sizeof(char), 1, dsk);
+        Diagrama += actual;
+        if(((i-super_block.s_bm_inode_start)%20) == 0 && (i-super_block.s_bm_inode_start) != 0){
+            Diagrama += "\n";
+        }
+    }
+
+    ofstream MyFile("BMInodos.txt");
+    MyFile << Diagrama;
+    MyFile.close();
+
+};
+
+void Reportes::BlockReportes(Parametros parameters, User Uss){
+    int pos;
+    string path = parameters.direccion;
+    int startpoint = Uss.startpoint;
+    string Diagrama = "digraph Bloques{\n node [shape=plaintext];\nrankdir=LR;\n ";
+
+
+    FILE* dsk = fopen(path.c_str(), "rb+");
+    fseek(dsk, startpoint, SEEK_SET);
+    //Leer Superblock
+    Sblock super_block;
+    fread(&super_block, sizeof(Sblock), 1, dsk);
+
+    I_node InodoRoot;
+    fseek(dsk, super_block.s_inode_start, SEEK_SET);
+    fread(&InodoRoot, sizeof(I_node), 1, dsk);
+
+    string stado(1, InodoRoot.i_type);
+
+    for (int i = 0; i < 15; i++){//WIP Apuntadores indirectos
+        if(InodoRoot.i_block[i] != -1){
+            pos = InodoRoot.i_block[i];
+            Diagrama +=GraphBlocks(pos,dsk, super_block, false);
+        }
+    }
+
+    Diagrama += "}";
+
+    ofstream MyFile("BLock.dot");
+    MyFile << Diagrama;
+    MyFile.close();
+
+    string com = "dot -Tpdf BLock.dot -o BLock.pdf";
+    const char *cmd = com.c_str();
+    system(cmd);
 
 };
 
@@ -90,30 +243,126 @@ void Reportes::ReportInodeRoot(Parametros parameters, User Uss){
 };
 
 
+
+string Reportes::GraphFileBlocks(I_node InodoArchivo, int BlockStartPoint, FILE* dsk, int InodoStart){
+
+    int contador;
+    string ContenidoStr = "";
+
+    //Leer el contenido de un bloque de archivos
+    for (int i = 0; i < 12; i++){
+        if(InodoArchivo.i_block[i] != -1){
+            contador = InodoArchivo.i_block[i];
+            ContenidoStr += "Block"+to_string(contador)+"[label=<\n<TABLE BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"1\" CELLPADDING=\"4\">\n";
+            ContenidoStr += "<TR>\n<TD BGCOLOR=\"purple\">Bloque Carpetas "+to_string(contador)+"</TD>\n</TR>\n";
+            BloqueArchivos bl_archivo;
+            fseek(dsk, BlockStartPoint + sizeof(BloqueCarpetas)*contador, SEEK_SET);
+            fread(&bl_archivo, sizeof(BloqueArchivos), 1, dsk);
+            ContenidoStr += "<TR>\n<TD>" + string(bl_archivo.b_content) + " </TD>\n</TR>\n";
+            ContenidoStr += "</TABLE>>];\n";
+        }
+    }
+
+    //Si el apuntador indirecto ya tiene informacion la lee
+    if(InodoArchivo.i_block[12] != -1){
+        BloqueApuntadores BPointer;
+        contador = InodoArchivo.i_block[12];
+        ContenidoStr += "Block"+to_string(InodoArchivo.i_block[11])+" -> Block"+to_string(contador)+"\n";
+        ContenidoStr += "Block"+to_string(contador)+"[label=<\n<TABLE BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"1\" CELLPADDING=\"4\">\n";
+        ContenidoStr += "<TR>\n<TD BGCOLOR=\"purple\">Bloque Carpetas "+to_string(contador)+"</TD>\n</TR>\n";
+
+        //Se busca el bloque de apuntador
+        fseek(dsk, BlockStartPoint + sizeof(BloqueApuntadores)*contador, SEEK_SET);
+        fread(&BPointer, sizeof(BloqueApuntadores), 1, dsk);
+        ContenidoStr += "<TR>\n<TD>" + ReadPointer(BPointer, dsk, BlockStartPoint) + " </TD>\n</TR>\n";
+        ContenidoStr += "</TABLE>>];\n";
+    }
+
+    //Apuntador indirecto doble con informacion
+    if(InodoArchivo.i_block[13] != -1){
+        BloqueApuntadores BPointer;
+        BloqueApuntadores BPointer2;
+        contador = InodoArchivo.i_block[12];
+        int contador2;
+        bool Escrito = false;
+
+        ContenidoStr += "Block"+to_string(InodoArchivo.i_block[12])+" -> Block"+to_string(contador)+"\n";
+        ContenidoStr += "Block"+to_string(contador)+"[label=<\n<TABLE BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"1\" CELLPADDING=\"4\">\n";
+        ContenidoStr += "<TR>\n<TD BGCOLOR=\"purple\">Bloque Carpetas "+to_string(contador)+"</TD>\n</TR>\n";
+
+        //Se busca el bloque de apuntador
+        fseek(dsk, BlockStartPoint + sizeof(BloqueApuntadores)*contador, SEEK_SET);
+        fread(&BPointer, sizeof(BloqueApuntadores), 1, dsk);
+
+        //Se Recorre el primer bloque de aputnadores
+        for (int j = 0; j < 16; j++){
+            //Se verifica que el apuntador ya este apuntando a otro apuntador
+            if(BPointer.b_pointers[j] != -1){
+                contador2 = BPointer.b_pointers[j];
+                fseek(dsk, BlockStartPoint + sizeof(BloqueApuntadores)*contador2, SEEK_SET);
+                fread(&BPointer2, sizeof(BloqueApuntadores), 1, dsk);
+                ContenidoStr += "<TR>\n<TD>" + ReadPointer(BPointer, dsk, BlockStartPoint) + " </TD>\n</TR>\n";
+            }
+        }
+        ContenidoStr += "</TABLE>>];\n";
+    }
+
+    return ContenidoStr;
+};
+
+
+string Reportes::ReadPointer(BloqueApuntadores Apuntador, FILE* dsk, int BlockStartPoint){
+    int contador;
+    string ContenidoStr;
+    ContenidoStr = "";
+
+    for (int i = 0; i < 16; i++){
+        if(Apuntador.b_pointers[i] != -1){
+            contador = Apuntador.b_pointers[i];
+
+            BloqueArchivos bl_archivo;
+            fseek(dsk, BlockStartPoint + sizeof(BloqueCarpetas)*contador, SEEK_SET);
+            fread(&bl_archivo, sizeof(BloqueArchivos), 1, dsk);
+            ContenidoStr += bl_archivo.b_content;
+            
+        }
+    }
+    return ContenidoStr;
+};
+
+
+
+
 string Reportes::GraphBlocks(int pos, FILE* dsk, Sblock SupBlock, bool Inodo){
 
     BloqueCarpetas bloqueCarpeta;
     int value;
     int value2;
     string Diagrama = "";
+    Content Actual;
     int SearchPoint = SupBlock.s_block_start + sizeof(BloqueCarpetas) * pos;
-
+    int posActualBloque;
     fseek(dsk, SearchPoint, SEEK_SET);
     fread(&bloqueCarpeta, sizeof(BloqueCarpetas), 1, dsk);
-
     int largo = sizeof(bloqueCarpeta.b_content) / sizeof(bloqueCarpeta.b_content[0]);
-    for (int i = 0; i < largo; i++){
-        Content Actual;
-        Actual = bloqueCarpeta.b_content[i];
 
-        if(!Inodo){
-            //Graficar Bloque WIP
-        }else{
-            char PathAct[12];
-            if(Actual.b_inodo != 0 and Actual.b_inodo  != -1){
-                pos = Actual.b_inodo;
-                Diagrama += GraphInodo(pos, dsk, SupBlock, Inodo);
-            }
+    if(!Inodo){
+        posActualBloque = pos;
+        Diagrama += "Block"+to_string(pos)+"[label=<\n<TABLE BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"1\" CELLPADDING=\"4\">\n";
+        Diagrama += "<TR>\n<TD BGCOLOR=\"purple\" COLSPAN=\"2\">Bloque Carpetas "+to_string(pos)+"</TD>\n</TR>\n";
+        for (int i = 0; i < largo; i++){
+            Actual = bloqueCarpeta.b_content[i];
+            Diagrama += "<TR>\n<TD BGCOLOR=\"lightblue\">b_name</TD><TD>" + string(Actual.b_name) + " </TD>\n</TR>\n";
+            Diagrama += "<TR>\n<TD BGCOLOR=\"lightblue\">Actual.b_inodo</TD><TD>" + to_string(Actual.b_inodo) + " </TD>\n</TR>\n";
+        }
+        Diagrama += "</TABLE>>];\n";
+    }
+    for (int i = 0; i < largo; i++){
+        Actual = bloqueCarpeta.b_content[i];
+        char PathAct[12];
+        if(Actual.b_inodo != 0 and Actual.b_inodo  != -1){
+            pos = Actual.b_inodo;
+            Diagrama += GraphInodo(pos, dsk, SupBlock, Inodo);
         }
     }
     return Diagrama;
@@ -131,7 +380,18 @@ string Reportes::GraphInodo(int pos, FILE* dsk, Sblock SupBlock, bool Inodo){
 
     if(!Inodo){  
         if(value == 0){
-            //Diagrama += ReadFileBlocks(inodoArchivo, SupBlock.s_block_start, dsk, SupBlock.s_inode_start);//WIP
+            if(value == 0){
+                Diagrama = GraphFileBlocks(inodoArchivo, SupBlock.s_block_start, dsk, SupBlock.s_inode_start);
+                return Diagrama;
+            }else{
+                for (int i = 0; i < 12; i++){//WIP Apuntadores Indirectos
+                    if(inodoArchivo.i_block[i] != -1){
+                        pos = inodoArchivo.i_block[i];
+                        Diagrama += GraphBlocks(pos,dsk, SupBlock, Inodo);
+                    }
+                }
+                return Diagrama;
+            }
         }
     }else{
         string stado(1, inodoArchivo.i_type);
@@ -150,7 +410,6 @@ string Reportes::GraphInodo(int pos, FILE* dsk, Sblock SupBlock, bool Inodo){
         if(value == 0){
             return Diagrama;
         }else{
-
             for (int i = 0; i < 12; i++){//WIP Apuntadores Indirectos
                 if(inodoArchivo.i_block[i] != -1){
                     Diagrama += "Inodo"+to_string(pos) +" -> Inodo";
@@ -356,5 +615,3 @@ int Reportes::ContarEBRs(int start,Parametros parameters, int ocupado){
 
     return Occupied;
 }
-
-

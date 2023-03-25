@@ -299,6 +299,13 @@ void Ann::ReconocerComando(string comando, vector<string> parametros){
         }
         report.GenerarReporte(cmd.param, Logued); //Ejecuta Generar Reporte
 
+    }else if(ComandoSeparado.find("#") == 0){//////////////////////// Comentario
+        string imprimir = ComandoSeparado;
+        for (int i = 0; i < parametros.size(); i++){
+            param = parametros.at(i);
+            imprimir += " "+param;
+        }
+        cout<<imprimir<<endl;
     }
 
     cmd.param = emptParam;
@@ -334,9 +341,19 @@ vector<string> Ann::split_txt(string text){ // Split para separar tipo de comand
     stringstream text_to_split(text);
     string segment;
     vector<string> splited;
+    string temp;
+
+
     
     while(getline(text_to_split, segment,' ')){
-       splited.push_back(segment);
+        if(segment.find(">path=\"")==0){
+            temp = segment;
+            getline(text_to_split, segment,' ');
+            temp += " "+segment;
+            splited.push_back(temp);
+        }else{
+            splited.push_back(segment);
+        }
     }
     return splited;
 

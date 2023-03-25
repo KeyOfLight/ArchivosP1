@@ -95,7 +95,7 @@ bool Compartido::WriteFileBlock(FILE* dsk, int startpoint, string pathMkfs, stri
     //Separar Path por /
     PathSeparado = split_Path(pathMkfs);
 
-    for (int i = 0; i < 15; i++){//WIP Apuntadores indirectos
+    for (int i = 0; i < 15; i++){
         if(InodoRoot.i_block[i] != -1){
             pos = InodoRoot.i_block[i];
             if(WrteBlckCarpetas(pos,dsk,PathSeparado, super_block, Escribir)){
@@ -151,8 +151,16 @@ bool Compartido::WrtInodo(int pos, FILE* dsk, vector<string> coincidencia, Sbloc
         if(CreateNewFileBlock(inodoArchivo, Escribir, dsk, SupBlock, SupBlock.s_inode_start + sizeof(I_node) * pos)){
             return true;
         }
+    }else{
+        for (int i = 0; i < 12; i++){
+            if(inodoArchivo.i_block[i] != -1){
+                pos = inodoArchivo.i_block[i];
+                if(WrteBlckCarpetas(pos,dsk,coincidencia, SupBlock, Escribir)){
+                    return true;
+                }
+            }
+        }
     }
-    //FALTA BUSCAR PARA CARPETAS WIP
 
     return false;
 };
@@ -498,7 +506,7 @@ string Compartido::LeerArchivoMkfs(FILE* dsk, int startpoint, string pathMkfs){
     //Separar Path por /
     PathSeparado = split_Path(pathMkfs);
 
-    for (int i = 0; i < 15; i++){//WIP Apuntadores indirectos
+    for (int i = 0; i < 15; i++){
         if(InodoRoot.i_block[i] != -1){
             pos = InodoRoot.i_block[i];
             DatosArch += ReadBlckCarpetas(pos,dsk,PathSeparado, super_block);
@@ -523,8 +531,14 @@ string Compartido::ReadInodo(int pos, FILE* dsk, vector<string> coincidencia, Sb
 
     if(value == 0){
         Datos += ReadFileBlocks(inodoArchivo, SupBlock.s_block_start, dsk, SupBlock.s_inode_start);
+    }else {
+        for (int i = 0; i < 12; i++){
+            if(inodoArchivo.i_block[i] != -1){
+                pos = inodoArchivo.i_block[i];
+                Datos += ReadBlckCarpetas(pos,dsk,coincidencia, SupBlock);
+            }
+        }
     }
-
     return Datos;
 
 };

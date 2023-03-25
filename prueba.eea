@@ -1,6 +1,7 @@
+#ELIMINACION DE PARTICIONES PRIMARIAS
 rmdisk >path=/home/useer/Disco1.dsk
 
-mkdisk >size=10 >unit=m >path=/home/useer/Disco1.dsk
+mkdisk >size=10 >unit=m >path="/home/useer/Dis co1.dsk"
 
 fdisk >size=400 >unit=K >path=/home/useer/Disco1.dsk >name=Brotato1
 
@@ -22,4 +23,4 @@ login >user=root >pass=123 >id=27brotato1
 
 mkgrp >name=usuarios
 
-rep >id=27brotato1 >path=/home/useer/Disco1.dsk >name=inode
+rep >id=27brotato1 >path=/home/useer/Disco1.dsk >name=sb

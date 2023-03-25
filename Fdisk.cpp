@@ -16,6 +16,7 @@ public:
     void EliminarParticion(Parametros parameters);
     
     int GetPositionFF(MBR mbrActual, int Tam);
+    int GetPositionWF(MBR mbrActual, int Tam);
     MBR OrdenarArray(MBR AllArrays);
     bool IstheDiskEmpty(MBR mbrActual);
     int GetPositionBF(MBR mbrActual, int Tam);
@@ -25,6 +26,7 @@ public:
     EBR ActivarEBR(Parametros parameters, int size, int startpoint, int siguiente);
     EBR GetPositionFFEbr(Particion PartExt, int Tam,Parametros parameters);
     EBR GetPositionBFEbr(Particion PartExt, int Tam,Parametros parameters);
+    EBR GetPositionWFEbr(Particion PartExt, int Tam,Parametros parameters);
     void EliminarPartL(int startpoint, bool Completo, string name, string path);
     void AddLogic(int startpoint, int maxsize, string name, string path, int add);
 
@@ -232,8 +234,8 @@ void Fdisk::CrearParticion(Parametros parameters)
             parameters.fit = "f";
 
         }else if(currentFit == 2){//Worst Fit
-            
-
+            startpoint = GetPositionWF(mbr, newsize);
+            parameters.fit = "w";
         }
 
     }
@@ -278,8 +280,7 @@ void Fdisk::CrearParticion(Parametros parameters)
                     return;
                 }
                 char newtype = 'e';
-                int result2 = strcmp(&mbr.particiones[i].type, &newtype);
-                if (result2 == 0){
+                if (mbr.particiones[i].type == newtype){
                     cout << "Solo se puede tener una particion de tipo extendida"<< endl;
                     return;
                 }
@@ -345,6 +346,9 @@ void Fdisk::CrearParticion(Parametros parameters)
             parameters.fit = "f";
 
         }else if(currentFit == 2){//Worst Fit
+
+            EmptEbr = GetPositionWFEbr(TempExt, newsize, parameters);
+            parameters.fit = "w";
             
         }
         for (int i = 0; i < 4; i++){
@@ -475,6 +479,51 @@ bool Fdisk::IstheDiskEmpty(MBR mbrActual){
 
 }
 
+
+int Fdisk::GetPositionWF(MBR mbrActual, int Tam){
+    int Pos;
+    int Posmbr = 0;
+    MBR AllArrays;
+    bool Discovacio = IstheDiskEmpty(mbrActual);
+    
+    if (Discovacio){
+        Pos = sizeof(MBR) + 1;
+        return Pos;
+    }
+
+    for (int i = 0; i < 4; i++){
+        if(mbrActual.particiones[i].status =='1'){
+            AllArrays.particiones[Posmbr] = (mbrActual.particiones[i]);
+            Posmbr += 1;
+        }
+    }
+
+    AllArrays = OrdenarArray(AllArrays);
+
+    int BestPosition = 0;
+
+    for (int i = 1; i < 4; i++){
+        Particion Actual = AllArrays.particiones[i];
+        Particion Anterior = AllArrays.particiones[i-1];
+
+        if(Actual.status != '0'){
+            int fin = Anterior.size + Anterior.start;
+            if(fin + Tam < Actual.start){
+                if (BestPosition != 0){
+                    if(fin - Actual.start > BestPosition)
+                        BestPosition = fin + Tam;
+                }else{
+                    BestPosition = fin;
+                }
+            }
+        }else{
+            return Anterior.size + Anterior.start;
+        }
+    }
+
+    return BestPosition;
+}
+
 int Fdisk::GetPositionFF(MBR mbrActual, int Tam){
     int Pos;
     int Posmbr = 0;
@@ -486,7 +535,6 @@ int Fdisk::GetPositionFF(MBR mbrActual, int Tam){
         return Pos;
     }
     
-
     for (int i = 0; i < 4; i++){
         if(mbrActual.particiones[i].status =='1'){
             AllArrays.particiones[Posmbr] = (mbrActual.particiones[i]);
@@ -681,6 +729,112 @@ int Fdisk::SearchNameEBR(Particion PartExt, string Nombre, Parametros parameters
 }
 
 EBR Fdisk::GetPositionBFEbr(Particion PartExt, int Tam,Parametros parameters){//Devuleve la mejor posicion disponible en el EBR
+    int Posmbr = 0;
+    bool Discovacio = false;
+    EBR WithPos;
+
+    string path = parameters.direccion;
+    int Occupied = 0;
+    FILE* dsk = fopen(path.c_str(), "rb+");
+    EBR tempebr;
+    int startpoint = PartExt.start;
+
+    if( CalcularSizeExt(startpoint, parameters, 0) == 0){
+        Discovacio = true;
+    }
+    
+    if (Discovacio){
+        WithPos.start = startpoint;
+        WithPos.p_siguiente = -1;
+        return WithPos;
+    }
+    fseek(dsk, startpoint, SEEK_SET);
+    fread(&tempebr, sizeof(EBR), 1, dsk);
+
+    while ((tempebr.status == '1')){
+       Posmbr += 1;
+       fseek(dsk, tempebr.p_siguiente, SEEK_SET);
+       fread(&tempebr, sizeof(EBR), 1, dsk);
+    }
+
+    if(Posmbr == 0){
+        WithPos.start = startpoint;
+        WithPos.p_siguiente = -1;
+        return WithPos;
+    }
+
+    EBR lista[Posmbr];
+    Posmbr = 0;
+    fseek(dsk, startpoint, SEEK_SET);
+    fread(&tempebr, sizeof(EBR), 1, dsk);
+
+    while (tempebr.status == '1'){
+        lista[Posmbr] = tempebr;
+        Posmbr += 1;
+        fseek(dsk, tempebr.p_siguiente, SEEK_SET);
+        fread(&tempebr, sizeof(EBR), 1, dsk);
+    }
+
+    EBR AllArrays[Posmbr];
+    memcpy(AllArrays, lista, sizeof(EBR));
+    int n = Posmbr;
+    int i,j;
+    EBR temp[n];
+    int postemp = 0;
+
+    for(i=1;i<n;i++)
+        for(j=n-1;j>=i;j--)
+            if(AllArrays[j-1].start > AllArrays[j].start and AllArrays[j-1].start != 0 and AllArrays[j].start != 0){
+            temp[postemp]=AllArrays[j-1];
+            AllArrays[j-1]=AllArrays[j];
+            AllArrays[j]=temp[postemp];
+            postemp += 1;
+        }
+
+    for (int i = 1; i < 4; i++){
+        EBR Actual = AllArrays[i];
+        EBR Anterior = AllArrays[i-1];
+
+        if(Actual.status != '0'){
+            int fin = Anterior.size + Anterior.start;
+            if(fin + Tam < Actual.start){
+                if (WithPos.start != 0){
+
+                    WithPos.start = fin;
+                    if(Anterior.p_siguiente != -1){
+                        WithPos.p_siguiente = Anterior.p_siguiente;
+                        Anterior.p_siguiente = fin;
+                        fseek(dsk, Anterior.start, SEEK_SET);
+                        fwrite(&Anterior, sizeof(EBR), 1, dsk);
+                    }else{
+                        Anterior.p_siguiente = fin;
+                        WithPos.p_siguiente = -1;
+                        fseek(dsk, Anterior.start, SEEK_SET);
+                        fwrite(&Anterior, sizeof(EBR), 1, dsk);
+                    }
+
+                        
+                }else{
+                    WithPos.start = fin;
+                    WithPos.p_siguiente = -1;
+                }
+            }
+        }else{
+            return WithPos;
+        }
+    }
+
+    AllArrays[0].p_siguiente = AllArrays[0].start + AllArrays[0].size;
+    fseek(dsk, AllArrays[0].start, SEEK_SET);
+    fwrite(&AllArrays[0], sizeof(EBR), 1, dsk);
+
+    WithPos.start = AllArrays[0].start + AllArrays[0].size;
+    WithPos.p_siguiente = -1;
+
+    return WithPos;
+}
+
+EBR Fdisk::GetPositionWFEbr(Particion PartExt, int Tam,Parametros parameters){//Devuleve la mejor posicion disponible en el EBR
     int Posmbr = 0;
     bool Discovacio = false;
     EBR WithPos;
